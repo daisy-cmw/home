@@ -1,15 +1,135 @@
-<h2>歡迎來到 Miss Chow 的網站</h2>
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miss Chow's Math Website</title>
+    <style>
+        /* 基礎全域設定 */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6; /* 溫和的淡灰綠色背景 */
+            color: #333;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
 
-<h3>S.5 Chapter 4</h3>
-<ol>
-    <li><a href="Tree-Diagram.html">Tree Diagram</a></li>
-    <li><a href="CountingPrinciples.html">Counting Principles</a></li>
-</ol>
+        /* 主容器 */
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05); /* 輕微的陰影，讓畫面有層次感 */
+        }
 
-<h3>S.6 Chapter 3</h3>
-<ol>
-    <li><a href="graphdance.html">數學舞蹈家 Math Dance</a></li>
-    <li><a href="TwoTransformation.html">Two Transformation Exercise</a></li>
-    <li><a href="Transformation-DSE-Long-Questions.html">Transformation - DSE Long Questions</a></li>
-    <li><a href="Transformation-Quiz.html">Transformation - Quiz</a></li>
-</ol>
+        /* 主標題樣式 */
+        h2 {
+            color: #1a4f43; /* 深翡翠綠 */
+            text-align: center;
+            font-size: 2.2em;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #e2ebd5;
+            padding-bottom: 15px;
+        }
+
+        /* 章節年級小標題 */
+        h3 {
+            color: #2c3e50;
+            font-size: 1.4em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* 加上年級專屬的小裝飾 */
+        h3::before {
+            content: "📚";
+            margin-right: 10px;
+            font-size: 1.1em;
+        }
+
+        /* 清單改為無序，準備製作成卡片 */
+        ol {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* 自動排版，大螢幕並排，手機單行 */
+            gap: 15px;
+        }
+
+        /* 單個卡片項目樣式 */
+        li {
+            margin: 0;
+        }
+
+        /* 超連結卡片化 */
+        li a {
+            display: block;
+            background: #fafafa;
+            border: 1px solid #e9e9e9;
+            padding: 18px 20px;
+            border-radius: 10px;
+            color: #34495e;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.25s ease; /* 讓滑鼠移過時的動畫變平滑 */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.01);
+        }
+
+        /* 滑鼠移到卡片上的變色效果 */
+        li a:hover {
+            background: #1a4f43; /* 變成主色 */
+            color: #ffffff;      /* 文字變白色 */
+            border-color: #1a4f43;
+            transform: translateY(-3px); /* 輕微向上浮起 */
+            box-shadow: 0 6px 15px rgba(26, 79, 67, 0.15); /* 加上帶有主題色的陰影 */
+        }
+
+        /* 自動在清單文字前加上數字編號 */
+        li {
+            counter-increment: step-counter;
+        }
+        li a::before {
+            content: counter(step-counter) ". ";
+            margin-right: 5px;
+            color: #1a4f43;
+            transition: color 0.25s ease;
+        }
+        li a:hover::before {
+            color: #fff; /* 移過去時數字也變白色 */
+        }
+
+        /* 當進入下一個 h3 時，數字重新計算 */
+        h3 + ol {
+            counter-reset: step-counter;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>👩‍🏫 歡迎來到 Miss Chow 的網站</h2>
+
+    <h3>S.5 Chapter 4</h3>
+    <ol>
+        <li><a href="Tree-Diagram.html">Tree Diagram</a></li>
+        <li><a href="CountingPrinciples.html">Counting Principles</a></li>
+    </ol>
+
+    <h3>S.6 Chapter 3</h3>
+    <ol>
+        <li><a href="graphdance.html">數學舞蹈家 Math Dance</a></li>
+        <li><a href="TwoTransformation.html">Two Transformation Exercise</a></li>
+        <li><a href="Transformation-DSE-Long-Questions.html">Transformation - DSE Long Questions</a></li>
+        <li><a href="Transformation-Quiz.html">Transformation - Quiz</a></li>
+    </ol>
+</div>
+
+</body>
+</html>
