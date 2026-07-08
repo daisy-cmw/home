@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S.6 Ch. 3 Mathematics Quiz - More about Graphs of Functions</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script id="MathJax-script" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+    <style>
+        .page-content { display: none; }
+        .page-content.active { display: block; }
+        .tab-btn.active { background-color: #1e293b; color: #ffffff; border-color: #1e293b; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased h-screen flex flex-col overflow-hidden">
+
+    <header class="bg-slate-900 text-white p-4 flex flex-col sm:flex-row justify-between items-center shadow-md shrink-0 border-b-4 border-indigo-600">
+        <div>
+            <h1 class="text-xl font-extrabold tracking-tight">S.6 Ch.3 Mathematics Quiz</h1>
+            <h2 class="text-xs text-slate-400">More about Graphs of Functions</h2>
+        </div>
+        <div class="flex items-center gap-4 text-xs mt-2 sm:mt-0 text-slate-300">
+            <div><strong>Time Allowed:</strong> 30 mins</div>
+            <div class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 flex items-center gap-2 shadow-inner">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" id="timerDot"></span>
+                <span class="font-mono font-bold text-slate-100" id="countdownDisplay">30:00</span>
+            </div>
+            <div><strong>Total Marks:</strong> 38 Marks</div>
+        </div>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- 左側題目面板保持不變 -->
+        <section class="w-1/2 flex flex-col border-r border-slate-200 bg-white overflow-hidden">
+            <div class="bg-slate-50 p-2 flex gap-2 border-b border-slate-200 shrink-0">
+                <button onclick="switchPage(1)" id="tab1" class="tab-btn active px-4 py-1.5 text-xs font-bold rounded-lg border border-slate-300 hover:bg-slate-200 transition cursor-pointer">Page 1 (MC 1-5)</button>
+                <button onclick="switchPage(2)" id="tab2" class="tab-btn px-4 py-1.5 text-xs font-bold rounded-lg border border-slate-300 hover:bg-slate-200 transition cursor-pointer">Page 2 (MC 6-9)</button>
+                <button onclick="switchPage(3)" id="tab3" class="tab-btn px-4 py-1.5 text-xs font-bold rounded-lg border border-slate-300 hover:bg-slate-200 transition cursor-pointer">Page 3 (Long Q10-11)</button>
+            </div>
+
+            <div class="flex-1 p-6 overflow-y-auto space-y-6">
+                
+                <div id="page1" class="page-content active space-y-6">
+                    <div class="border-b border-indigo-100 pb-2 mb-4">
+                        <h3 class="font-bold text-indigo-900 text-sm">Section (A) Multiple Choice Questions (18 Marks)</h3>
+                        <p class="text-xs text-slate-500">2 marks each. Read the questions and select your answers on the right panel.</p>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm space-y-3">
+                        <p class="font-semibold"><span class="text-indigo-600">1.</span> (2008 – MC10) The figure shows the graph of \(y = f(x)\), where \(f(x)\) is a quadratic function. The solution of \(f(x) < 3\) is</p>
+                        <div class="bg-white p-2 border border-slate-200 rounded-lg max-w-sm mx-auto shadow-sm">
+                            <img src="Q1_.jpg" alt="Question 1 Graph" class="w-full h-auto object-contain mx-auto rounded">
+                        </div>
+                        <div class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 space-y-1">
+                            <div><strong>A.</strong> \(a < x < d\)</div>
+                            <div><strong>B.</strong> \(b < x < c\)</div>
+                            <div><strong>C.</strong> \(x < a\) or \(x > d\)</div>
+                            <div><strong>D.</strong> \(x < b\) or \(x > c\)</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm space-y-3">
+                        <p class="font-semibold"><span class="text-indigo-600">2.</span> (2009-MC37) The figure shows the graph of \(y=f(x)\). If \(f(x)=3g(x)\), which of the following may represent the graph of \(y=g(x)\)?</p>
+                        <div class="bg-white p-2 border border-slate-200 rounded-lg max-w-sm mx-auto shadow-sm">
+                            <img src="Q1.png" alt="Question 2 Graph" class="w-full h-auto object-contain mx-auto rounded">
+                        </div>
+                        <div class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 space-y-1">
+                            <div><strong>A.</strong> y-intercept = 45, x-intercepts = 2, 7</div>
+                            <div><strong>B.</strong> y-intercept = 5, x-intercepts = 2, 7</div>
+                            <div><strong>C.</strong> y-intercept = 45, x-intercepts = 6, 21</div>
+                            <div><strong>D.</strong> y-intercept = 5, x-intercepts = 6, 21</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm space-y-3">
+                        <p class="font-semibold"><span class="text-indigo-600">3.</span> (2010-MC37) Let \(f(x)\) be a quadratic function. The figure shows the graph of \(y=f(x)\) after a reflection. It corresponds to:</p>
+                        <div class="bg-white p-2 border border-slate-200 rounded-lg max-w-sm mx-auto shadow-sm">
+                            <img src="Q2.jpg" alt="Question 3 Graph" class="w-full h-auto object-contain mx-auto rounded">
+                        </div>
+                        <div class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 space-y-1">
+                            <div><strong>A.</strong> the graph of \(y=f(x-2)\)</div>
+                            <div><strong>B.</strong> the graph of \(y=f(x+2)\)</div>
+                            <div><strong>C.</strong> the graph of \(y=f(-x)\)</div>
+                            <div><strong>D.</strong> the graph of \(y=-f(x)\)</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm space-y-3">
+                        <p class="font-semibold"><span class="text-indigo-600">4.</span> (2007-MC38) Which of the following may represent the graph of \(y=f(x)\) and the graph of \(y=f(x+1)\) on the same rectangular coordinate system?</p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-white p-2 border border-slate-200 rounded-lg shadow-sm flex flex-col items-center">
+                                <span class="text-xs font-bold self-start text-indigo-600">A.</span>
+                                <img src="Q3_Choice A.jpg" alt="Choice A" class="h-28 w-auto object-contain rounded">
+                            </div>
+                            <div class="bg-white p-2 border border-slate-200 rounded-lg shadow-sm flex flex-col items-center">
+                                <span class="text-xs font-bold self-start text-indigo-600">B.</span>
+                                <img src="Q3_Choice B.jpg" alt="Choice B" class="h-28 w-auto object-contain rounded">
+                            </div>
+                            <div class="bg-white p-2 border border-slate-200 rounded-lg shadow-sm flex flex-col items-center">
+                                <span class="text-xs font-bold self-start text-indigo-600">C.</span>
+                                <img src="Q3_Choice C.jpg" alt="Choice C" class="h-28 w-auto object-contain rounded">
+                            </div>
+                            <div class="bg-white p-2 border border-slate-200 rounded-lg shadow-sm flex flex-col items-center">
+                                <span class="text-xs font-bold self-start text-indigo-600">D.</span>
+                                <img src="Q3_Choice D.jpg" alt="Choice D" class="h-28 w-auto object-contain rounded">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm space-y-3">
+                        <p class="font-semibold"><span class="text-indigo-600">5.</span> (2014-MC38) Which of the following may represent the graph of \(y=f(x)\) and the graph of \(y=1-f(x)\) on the same rectangular coordinate system?</p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-white p-2 border border-slate-200 rounded-lg shadow-sm flex flex-col items-center">
+                                <span class="text-xs font-bold self-start text-indigo-600">A.</span>
+                                <img src="Q4_Choice A.jpg" alt="Choice A" class="h-28 w-auto object-contain rounded">
+                            </div>
+                            <div class="bg-white p-2 border border-slate-200 rounded-lg shadow-sm flex flex-col items-center">
+                                <span class="text-xs font-bold self-start text-indigo-600">B.</span>
+                                <img src="Q4_Choice B.jpg" alt="Choice B" class="h-28 w-auto object-contain rounded">
+                            </div>
+                            <div class="bg-white p-2 border border-slate-200 rounded-lg shadow-sm flex flex-col items-center">
+                                <span class="text-xs font-bold self-start text-indigo-600">C.</span>
+                                <img src="Q4_Choice C.jpg" alt="Choice C" class="h-28 w-auto object-contain rounded">
+                            </div>
+                            <div class="bg-white p-2 border border-slate-200 rounded-lg shadow-sm flex flex-col items-center">
+                                <span class="text-xs font-bold self-start text-indigo-600">D.</span>
+                                <img src="Q4_Choice D.jpg" alt="Choice D" class="h-28 w-auto object-contain rounded">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="page2" class="page-content space-y-6">
+                    <div class="border-b border-indigo-100 pb-2 mb-4">
+                        <h3 class="font-bold text-indigo-900 text-sm">Section (A) Multiple Choice Questions (Continued)</h3>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm space-y-3">
+                        <p class="font-semibold"><span class="text-indigo-600">6.</span> The figure shows the graph of \(y=f(x)\) with x-intercepts at \(-12\) and \(4\). If \(g(x)=f(\frac{x}{2})\), which graph represents \(y=g(x)\)?</p>
+                        <div class="bg-white p-2 border border-slate-200 rounded-lg max-w-sm mx-auto shadow-sm">
+                            <img src="Q5.jpg" alt="Question 6 Graph" class="w-full h-auto object-contain mx-auto rounded">
+                        </div>
+                        <div class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 space-y-1">
+                            <div><strong>A.</strong> y-intercept = 5, x-intercept = -6, 2</div>
+                            <div><strong>B.</strong> y-intercept = 10, x-intercept = -6, 2</div>
+                            <div><strong>C.</strong> y-intercept = 5, x-intercept = -24, 8</div>
+                            <div><strong>D.</strong> y-intercept = 10, x-intercept = -24, 8</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm space-y-3">
+                        <p class="font-semibold"><span class="text-indigo-600">7.</span> The figure shows the graph of \(y=f(x)\). Which of the following may represent the transformation?</p>
+                        <div class="bg-white p-2 border border-slate-200 rounded-lg max-w-sm mx-auto shadow-sm">
+                            <img src="Q7.png" alt="Question 7 Graph" class="w-full h-auto object-contain mx-auto rounded">
+                        </div>
+                        <div class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 space-y-1">
+                            <div><strong>A.</strong> 3</div>
+                            <div><strong>B.</strong> 8</div>
+                            <div><strong>C.</strong> 9</div>
+                            <div><strong>D.</strong> 33</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm space-y-3">
+                        <p class="font-semibold"><span class="text-indigo-600">8.</span> Let \(f(x)\) be a quadratic function. The figure shows the graph after transformations. It corresponds to:</p>
+                        <div class="bg-white p-2 border border-slate-200 rounded-lg max-w-sm mx-auto shadow-sm">
+                            <img src="Q6.png" alt="Question 8 Graph" class="w-full h-auto object-contain mx-auto rounded">
+                        </div>
+                        <div class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 space-y-1">
+                            <div><strong>A.</strong> the graph of \(y=f(-x+1)\)</div>
+                            <div><strong>B.</strong> the graph of \(y=f(-x-1)\)</div>
+                            <div><strong>C.</strong> the graph of \(y=-f(x)+1\)</div>
+                            <div><strong>D.</strong> the graph of \(y=-f(x)-1\)</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm">
+                        <p class="font-semibold mb-2"><span class="text-indigo-600">9.</span> If \(f(x)\) is transformed to \(g(x)=-f(2x+3)\), which of the following transformation orders is correct?</p>
+                        <div class="text-xs text-slate-500 bg-white border border-slate-200 rounded-lg p-2.5 mb-2 space-y-1">
+                            <div>(1) Translate leftwards by 3 units.</div>
+                            <div>(2) Reflect about the x-axis.</div>
+                            <div>(3) Reduce along the x-axis to half of the original.</div>
+                            <div>(4) Reflect about the y-axis.</div>
+                        </div>
+                        <div class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 space-y-1">
+                            <div><strong>A.</strong> (4), (1), (3)</div>
+                            <div><strong>B.</strong> (2), (1), (3)</div>
+                            <div><strong>C.</strong> (2), (3), (1)</div>
+                            <div><strong>D.</strong> (3), (1), (4)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="page3" class="page-content space-y-6">
+                    <div class="border-b border-indigo-100 pb-2 mb-4">
+                        <h3 class="font-bold text-indigo-900 text-sm">Section (B) Long Questions (20 Marks)</h3>
+                        <div class="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 space-y-1">
+                            <div class="font-bold tracking-wide text-amber-950 uppercase">💡 Math Expression Input Guide:</div>
+                            <p>• For addition and subtraction, type normal plus <code class="bg-amber-100 px-1 rounded font-mono text-amber-950">+</code> and minus <code class="bg-amber-100 px-1 rounded font-mono text-amber-950">-</code> symbols.</p>
+                            <p>• For exponents/indices (次方), use the caret key <code class="bg-amber-100 px-1 rounded font-mono text-amber-950">^</code>.</p>
+                            <p class="font-medium bg-amber-200/50 p-1.5 rounded text-amber-950 mt-1">Example: If the expression is \(x^2 + 3x - 4\), you should input: <code class="bg-white border border-amber-300 px-1.5 py-0.5 rounded font-mono text-sm font-bold">x^2 + 3x - 4</code></p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-3">
+                        <p class="font-bold text-sm text-indigo-950"><span class="text-indigo-600">10.</span> The figure shows the graph of \(y = -x^3 + 6x^2 - 11x + 6\), by adding suitable straight lines, find the roots of the following equations. (Correct your answers to 1 d.p.) (4 marks)</p>
+                        <div class="bg-white p-2 border border-slate-200 rounded-lg max-w-xs mx-auto shadow-sm">
+                            <img src="Q10.jpg" alt="Question 10 Polynomial Curve" class="w-full h-auto object-contain mx-auto rounded">
+                        </div>
+                        <div class="space-y-2 mt-2 font-medium">
+                            <div class="p-2 bg-white rounded border border-slate-200">
+                                <strong>(a)</strong> \(-x^3 + 6x^2 - 11x + 5.8 = 0\)
+                            </div>
+                            <div class="p-2 bg-white rounded border border-slate-200">
+                                <strong>(b)</strong> \(2x^3 - 12x^2 + 22x - 10 = 0\)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-3">
+                        <p class="font-bold text-sm text-indigo-950"><span class="text-indigo-600">11.</span> The table shows the graph of the function \(y=f(x)\). It becomes the graph of \(y=g(x)\) after undergoing a transformation. Complete the table. (16 marks)</p>
+                        
+                        <div class="space-y-2 font-medium">
+                            <div class="bg-white p-2.5 rounded border border-slate-200">
+                                <span class="font-bold text-indigo-700">(a)</span> Original \(y=x^2+2\), "Translate upwards by 2 units".
+                            </div>
+                            <div class="bg-white p-2.5 rounded border border-slate-200">
+                                <span class="font-bold text-indigo-700">(b)</span> Original \(y=x^2+3\), "Reduce along the x-axis to 1/3 of the original".
+                            </div>
+                            <div class="bg-white p-2.5 rounded border border-slate-200">
+                                <span class="font-bold text-indigo-700">(c)</span> Original \(y=x^2-x+2\), "Reflect about the x-axis".
+                            </div>
+                            <div class="bg-white p-2.5 rounded border border-slate-200">
+                                <span class="font-bold text-indigo-700">(d)</span> Original \(y=x^2-x-1\), "Translate to the left by 2 units".
+                            </div>
+                            <div class="bg-white p-2.5 rounded border border-slate-200">
+                                <span class="font-bold text-indigo-700">(e)</span> Original \(y=\sin x\), "Enlarge along the y-axis by 5 times".
+                            </div>
+                            <div class="bg-white p-2.5 rounded border border-slate-200">
+                                <span class="font-bold text-indigo-700">(f)</span> Original \(y=\cos x\), "Reflect about the y-axis".
+                            </div>
+                            <div class="bg-white p-2.5 rounded border border-slate-200">
+                                <span class="font-bold text-indigo-700">(g)</span> Original \(y=x\). The function becomes \(y=-f(x-3)\). Describe the transformation(s) on the graph.
+                            </div>
+                            <div class="bg-white p-2.5 rounded border border-slate-200">
+                                <span class="font-bold text-indigo-700">(h)</span> Original \(y=x^2\). The function becomes \(y=f(\frac{x+1}{2})\). Describe the transformation(s) on the graph.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="w-1/2 flex flex-col bg-slate-50 overflow-hidden">
+            <div class="bg-indigo-900 text-white p-3 text-xs font-bold tracking-wider shrink-0 flex justify-between items-center">
+                <span>ANSWER SHEET</span>
+                <span class="bg-indigo-700 px-2 py-0.5 rounded text-[10px]">Instant Self-Checking</span>
+            </div>
+
+            <form id="quizForm" onsubmit="event.preventDefault(); evaluateQuiz();" class="flex-1 flex flex-col overflow-hidden">
+                <div class="flex-1 p-6 overflow-y-auto space-y-6">
+                    
+                    <!-- 【新加入】學生基本資料填寫欄位 -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
+                        <h4 class="font-bold text-xs text-slate-500 uppercase tracking-wider border-b border-slate-100 pb-2">Student Information</h4>
+                        <div class="grid grid-cols-3 gap-3 text-xs">
+                            <div class="flex flex-col gap-1">
+                                <label class="font-semibold text-slate-600">Class 班別</label>
+                                <select id="studentClass" required class="bg-white border border-slate-300 rounded px-2 py-1.5 focus:outline-none focus:border-indigo-500">
+                                    <option value="">-- Select --</option>
+                                    <option value="6A">6A</option>
+                                    <option value="6B">6B</option>
+                                    <option value="6C">6C</option>
+                                    <option value="6D">6D</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <label class="font-semibold text-slate-600">Class No. 座號</label>
+                                <input type="number" id="studentClassNo" required min="1" max="45" placeholder="e.g. 12" class="bg-white border border-slate-300 rounded px-2 py-1.5 focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <label class="font-semibold text-slate-600">Name 姓名</label>
+                                <input type="text" id="studentName" required placeholder="English Name" class="bg-white border border-slate-300 rounded px-2 py-1.5 focus:outline-none focus:border-indigo-500">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 答案卡其餘部分保持不變 -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                        <h4 class="font-bold text-xs text-slate-500 uppercase tracking-wider border-b border-slate-100 pb-2 mb-3">Section A: MC Answers</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <script>
+                                for(let i=1; i<=9; i++){
+                                    document.write(`
+                                        <div class="p-2 bg-slate-50 rounded-lg border border-slate-200 flex flex-col gap-1">
+                                            <span class="text-xs font-bold text-slate-600">Question ${i}</span>
+                                            <select name="mc${i}" class="bg-white border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-indigo-500 cursor-pointer">
+                                                <option value="">-- Choose --</option>
+                                                <option value="A">A</option>
+                                                <option value="B">B</option>
+                                                <option value="C">C</option>
+                                                <option value="D">D</option>
+                                            </select>
+                                            <div id="ans_mc${i}" class="hidden text-[11px] font-bold mt-1 p-1 rounded"></div>
+                                        </div>
+                                    `);
+                                }
+                            </script>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-5">
+                        <h4 class="font-bold text-xs text-slate-500 uppercase tracking-wider border-b border-slate-100 pb-2 mb-1">Section B: Long Questions</h4>
+                        
+                        <div class="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-4">
+                            <h5 class="text-xs font-bold text-indigo-900 border-b border-indigo-100 pb-1">Question 10 Answers</h5>
+                            
+                            <div class="space-y-1 text-xs">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-semibold text-slate-700 min-w-[140px]">10(a) Add straight line: y =</span>
+                                    <input type="text" id="q10a_line" placeholder="Enter function..." class="flex-1 bg-white border border-slate-300 rounded px-3 py-1.5 focus:outline-none focus:border-indigo-500">
+                                </div>
+                                <span id="chk_q10a_line" class="text-[11px] font-bold block pl-[148px]"></span>
+                                
+                                <div class="space-y-1 mt-2">
+                                    <label class="block font-semibold text-slate-700">The root(s) is / are:</label>
+                                    <input type="text" id="q10a_roots" placeholder="Enter root(s)..." class="w-full bg-white border border-slate-300 rounded px-3 py-1.5 focus:outline-none focus:border-indigo-500">
+                                    <span id="chk_q10a_roots" class="text-[11px] font-bold block"></span>
+                                </div>
+                            </div>
+
+                            <div class="space-y-1 text-xs pt-3 border-t border-dashed border-indigo-100">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-semibold text-slate-700 min-w-[140px]">10(b) Add straight line: y =</span>
+                                    <input type="text" id="q10b_line" placeholder="Enter function..." class="flex-1 bg-white border border-slate-300 rounded px-3 py-1.5 focus:outline-none focus:border-indigo-500">
+                                </div>
+                                <span id="chk_q10b_line" class="text-[11px] font-bold block pl-[148px]"></span>
+                                
+                                <div class="space-y-1 mt-2">
+                                    <label class="block font-semibold text-slate-700">The root(s) is / are:</label>
+                                    <input type="text" id="q10b_roots" placeholder="Enter root(s)..." class="w-full bg-white border border-slate-300 rounded px-3 py-1.5 focus:outline-none focus:border-indigo-500">
+                                    <span id="chk_q10b_roots" class="text-[11px] font-bold block"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
+                            <h5 class="text-xs font-bold text-slate-700 border-b border-slate-200 pb-1">Question 11 Answers</h5>
+                            
+                            <div class="space-y-1 text-xs">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium text-slate-700 min-w-[120px]">11(a) New Function y =</span>
+                                    <input type="text" id="fb1" placeholder="Enter function..." class="flex-1 bg-white border border-slate-300 rounded px-3 py-1.5 focus:outline-none focus:border-indigo-500">
+                                </div>
+                                <span id="chk_fb1" class="text-[11px] font-bold block pl-[128px]"></span>
+                            </div>
+                            <div class="space-y-1 text-xs">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium text-slate-700 min-w-[120px]">11(b) New Function y =</span>
+                                    <input type="text" id="fb2" placeholder="Enter function..." class="flex-1 bg-white border border-slate-300 rounded px-3 py-1.5 focus:outline-none focus:border-indigo-500">
+                                </div>
+                                <span id="chk_fb2" class="text-[11px] font-bold block pl-[128px]"></span>
+                            </div>
+                            <div class="space-y-1 text-xs">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium text-slate-700 min-w-[120px]">11(c) New Function y =</span>
+                                    <input type="text" id="fb3" placeholder="Enter function..." class="flex-1 bg-white border border-slate-300 rounded px-3 py-1.5 focus:outline-none focus:border-indigo-500">
+                                </div>
+                                <span id="chk_fb3" class="text-[11px] font-bold block pl-[128px]"></span>
+                            </div>
+                            <div class="space-y-1 text-xs">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium text-slate-700 min-w-[120px]">11(d) New Function y =</span>
+                                    <input type="text" id="fb4" placeholder="Enter function..." class="flex-1 bg-white border border-slate-300 rounded px-3 py-1.5 focus:outline-none focus:border-indigo-500">
+                                </div>
+                                <span id="chk_fb4" class="text-[11px] font-bold block pl-[128px]"></span>
+                            </div>
+                            <div class="space-y-1 text-xs">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium text-slate-700 min-w-[120px]">11(e) New Function y =</span>
+                                    <input type="text" id="fb5" placeholder="Enter function..." class="flex-1 bg-white border border-slate-300 rounded px-3 py-1.5 focus:outline-none focus:border-indigo-500">
+                                </div>
+                                <span id="chk_fb5" class="text-[11px] font-bold block pl-[128px]"></span>
+                            </div>
+                            <div class="space-y-1 text-xs">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium text-slate-700 min-w-[120px]">11(f) New Function y =</span>
+                                    <input type="text" id="fb6" placeholder="Enter function..." class="flex-1 bg-white border border-slate-300 rounded px-3 py-1.5 focus:outline-none focus:border-indigo-500">
+                                </div>
+                                <span id="chk_fb6" class="text-[11px] font-bold block pl-[128px]"></span>
+                            </div>
+                            <div class="space-y-1.5 text-xs pt-2 border-t border-slate-200">
+                                <label class="block font-medium text-slate-700">11(g) Describe the transformation(s) sequentially:</label>
+                                <input type="text" id="fb7_1" placeholder="Step 1 description..." class="w-full bg-white border border-slate-300 rounded px-3 py-1.5 focus:outline-none focus:border-indigo-500">
+                                <span id="chk_fb7_1" class="text-[11px] font-bold block"></span>
+                                <input type="text" id="fb7_2" placeholder="Step 2 description..." class="w-full bg-white border border-slate-300 rounded px-3 py-1.5 focus:outline-none focus:border-indigo-500 mt-1">
+                                <span id="chk_fb7_2" class="text-[11px] font-bold block"></span>
+                            </div>
+                            <div class="space-y-1 text-xs">
+                                <label class="block font-medium text-slate-700">11(h) Describe the complete transformation(s):</label>
+                                <input type="text" id="fb8" placeholder="Enter full statement..." class="w-full bg-white border border-slate-300 rounded px-3 py-1.5 focus:outline-none focus:border-indigo-500">
+                                <span id="chk_fb8" class="text-[11px] font-bold block"></span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div id="resultsCard" class="hidden bg-slate-950 rounded-xl p-5 text-white text-center shadow-md">
+                        <h5 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Performance Evaluation</h5>
+                        <div class="text-3xl font-black text-amber-400 my-2" id="scoreValue">0 / 38</div>
+                        <p class="text-[11px] text-slate-300" id="commentLabel"></p>
+                    </div>
+
+                </div>
+
+                <div id="actionButtonsArea" class="bg-white border-t border-slate-200 p-4 flex gap-4 shrink-0">
+                    <button type="button" id="clearBtn" onclick="clearForm();" class="flex-1 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-600 bg-white hover:bg-slate-50 transition cursor-pointer">Clear Form</button>
+                    <button type="submit" id="submitBtn" class="flex-1 py-2 rounded-xl bg-indigo-600 text-xs font-bold text-white hover:bg-indigo-700 shadow transition cursor-pointer">Submit & Check</button>
+                </div>
+            </form>
+        </section>
+
+    </main>
+
+    <script>
+        // 30 Minutes Countdown Timer System保持不變
+        let totalSeconds = 30 * 60;
+        const timerDisplay = document.getElementById("countdownDisplay");
+        const timerDot = document.getElementById("timerDot");
+
+        const timerInterval = setInterval(() => {
+            if (totalSeconds <= 0) {
+                clearInterval(timerInterval);
+                timerDisplay.textContent = "00:00";
+                timerDisplay.className = "text-red-500 font-bold font-mono";
+                timerDot.className = "w-2 h-2 rounded-full bg-red-600 animate-ping";
+                alert("Time is up! The quiz will now be evaluated automatically.");
+                evaluateQuiz();
+                return;
+            }
+
+            totalSeconds--;
+            let mins = Math.floor(totalSeconds / 60);
+            let secs = totalSeconds % 60;
+
+            mins = mins < 10 ? "0" + mins : mins;
+            secs = secs < 10 ? "0" + secs : secs;
+            timerDisplay.textContent = `${mins}:${secs}`;
+
+            if (totalSeconds < 300) {
+                timerDisplay.className = "text-red-400 font-bold font-mono";
+                timerDot.className = "w-2 h-2 rounded-full bg-red-500 animate-ping";
+            }
+        }, 1000);
+
+        function switchPage(pageNumber) {
+            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(`page${pageNumber}`).classList.add('active');
+            document.getElementById(`tab${pageNumber}`).classList.add('active');
+        }
+
+        const mcSolutions = { 
+            mc1: "A", mc2: "D", mc3: "C", mc4: "D", mc5: "A", 
+            mc6: "D", mc7: "C", mc8: "A", mc9: "B" 
+        };
+
+        // 【新加入】背景傳送資料至 Google Sheet 函式
+        function submitDataToBackend(studentClass, studentClassNo, studentName, totalScore) {
+            // 請替換成你自己 Google Apps Script 部署後的 Web App URL
+            const webAppUrl = "https://script.google.com/macros/s/AKfycbxX8uK3F2lbIMFSvXnfE-kXm-Q2RPLVNPxDgEkR2FxzH3bftghy5sRUXl4mTx7U47cj/exec"; 
+            
+            // 根據規範，使用 URLSearchParams 包裝，不傳送純 JSON
+            const payload = new URLSearchParams();
+            payload.append("studentClass", studentClass);
+            payload.append("studentClassNo", studentClassNo);
+            payload.append("studentName", studentName);
+            payload.append("score", totalScore);
+
+            // 使用 fetch 且設定 mode: 'no-cors' 與特定 headers
+            fetch(webAppUrl, {
+                method: "POST",
+                mode: "no-cors",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: payload.toString()
+            })
+            .then(() => console.log("Data background sync initialized."))
+            .catch(err => console.error("Sync error:", err));
+        }
+
+        function evaluateQuiz() {
+            clearInterval(timerInterval);
+            timerDot.className = "w-2 h-2 rounded-full bg-slate-500 animate-none";
+
+            let secA = 0;
+            let secB = 0;
+
+            // Evaluate Section A
+            for (let i = 1; i <= 9; i++) {
+                const select = document.querySelector(`select[name="mc${i}"]`);
+                const outBox = document.getElementById(`ans_mc${i}`);
+                if(outBox) outBox.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+
+                if (select && select.value) {
+                    if (select.value === mcSolutions[`mc${i}`]) {
+                        secA += 2;
+                        if(outBox) {
+                            outBox.textContent = `✓ Correct (2 Marks)`;
+                            outBox.classList.add('bg-green-100', 'text-green-800');
+                        }
+                    } else {
+                        if(outBox) {
+                            outBox.textContent = `✗ Incorrect. Correct: ${mcSolutions[`mc${i}`]}`;
+                            outBox.classList.add('bg-red-100', 'text-red-800');
+                        }
+                    }
+                } else {
+                    if(outBox) {
+                        outBox.textContent = `⚠ Unanswered. Correct: ${mcSolutions[`mc${i}`]}`;
+                        outBox.classList.add('bg-red-100', 'text-red-800');
+                    }
+                }
+            }
+
+            // Evaluate Section B - Question 10(a)
+            const raw10a_line = document.getElementById("q10a_line").value.trim().toLowerCase().replace(/\s+/g, '');
+            const ok10a_line = (raw10a_line === "0.2" || raw10a_line === "y=0.2");
+            if(ok10a_line) secB += 1;
+            document.getElementById("chk_q10a_line").textContent = ok10a_line ? "✓ Correct (1 Mark)" : "✗ Incorrect. Solution: 0.2";
+            document.getElementById("chk_q10a_line").className = `text-[11px] font-bold block pl-[148px] ${ok10a_line ? "text-green-600" : "text-red-600"}`;
+
+            let raw10a_roots_str = document.getElementById("q10a_roots").value.trim().toLowerCase();
+            let hasInvalidLetters10a = /[a-wz]/.test(raw10a_roots_str); 
+            let ok10a_roots = false;
+            if (!hasInvalidLetters10a) {
+                let cleaned10a = raw10a_roots_str.replace(/x/g, '').replace(/=/g, '').trim();
+                let parsed10a_arr = cleaned10a.split(/[\s,;]+/).map(Number).sort((a,b)=>a-b);
+                const set1 = [0.9, 2.2, 2.8];
+                const set2 = [0.9, 2.2, 2.9];
+                const matchesSet1 = parsed10a_arr.length === 3 && parsed10a_arr.every((v, i) => Math.abs(v - set1[i]) < 0.01);
+                const matchesSet2 = parsed10a_arr.length === 3 && parsed10a_arr.every((v, i) => Math.abs(v - set2[i]) < 0.01);
+                ok10a_roots = (matchesSet1 || matchesSet2);
+            }
+            if(ok10a_roots) secB += 1;
+            document.getElementById("chk_q10a_roots").textContent = ok10a_roots ? "✓ Correct (1 Mark)" : "✗ Incorrect. Solution: 0.9, 2.2, 2.9 or 2.8";
+            document.getElementById("chk_q10a_roots").className = `text-[11px] font-bold block ${ok10a_roots ? "text-green-600" : "text-red-600"}`;
+
+            // Evaluate Section B - Question 10(b)
+            const raw10b_line = document.getElementById("q10b_line").value.trim().toLowerCase().replace(/\s+/g, '');
+            const ok10b_line = (raw10b_line === "1" || raw10b_line === "y=1");
+            if(ok10b_line) secB += 1;
+            document.getElementById("chk_q10b_line").textContent = ok10b_line ? "✓ Correct (1 Mark)" : "✗ Incorrect. Solution: 1";
+            document.getElementById("chk_q10b_line").className = `text-[11px] font-bold block pl-[148px] ${ok10b_line ? "text-green-600" : "text-red-600"}`;
+
+            let raw10b_roots_str = document.getElementById("q10b_roots").value.trim().toLowerCase();
+            let hasInvalidLetters10b = /[a-wz]/.test(raw10b_roots_str);
+            let ok10b_roots = false;
+            if (!hasInvalidLetters10b) {
+                let cleaned10b = raw10b_roots_str.replace(/x/g, '').replace(/=/g, '').trim();
+                ok10b_roots = (cleaned10b === "0.7" || cleaned10b === "0.6");
+            }
+            if(ok10b_roots) secB += 1;
+            document.getElementById("chk_q10b_roots").textContent = ok10b_roots ? "✓ Correct (1 Mark)" : "✗ Incorrect. Solution: 0.7 or 0.6";
+            document.getElementById("chk_q10b_roots").className = `text-[11px] font-bold block ${ok10b_roots ? "text-green-600" : "text-red-600"}`;
+
+            // Evaluate Section B - Question 11
+            const parse = (id) => document.getElementById(id).value.trim().toLowerCase().replace(/\s+/g, '');
+            const showStatus = (id, ok, ref) => {
+                const el = document.getElementById(id);
+                el.textContent = ok ? "✓ Correct (2 Marks)" : `✗ Incorrect. Solution reference: ${ref}`;
+                el.className = `text-[11px] font-bold block pl-[128px] mt-1 ${ok ? "text-green-600" : "text-red-600"}`;
+            };
+
+            let v1 = parse("fb1"); let ok1 = (v1 === "x^2+4" || v1 === "x²+4"); if (ok1) secB += 2; showStatus("chk_fb1", ok1, "x^2 + 4");
+            let v2 = parse("fb2"); let ok2 = (v2 === "9x^2+3" || v2 === "9x²+3" || v2 === "(3x)^2+3"); if (ok2) secB += 2; showStatus("chk_fb2", ok2, "9x^2 + 3");
+            let v3 = parse("fb3"); let ok3 = (v3 === "-x^2+x-2" || v3 === "-x²+x-2" || v3 === "-(x^2-x+2)"); if (ok3) secB += 2; showStatus("chk_fb3", ok3, "-x^2 + x - 2");
+            let v4 = parse("fb4"); let ok4 = (v4 === "x^2+3x+1" || v4 === "x²+3x+1"); if (ok4) secB += 2; showStatus("chk_fb4", ok4, "x^2 + 3x + 1");
+            let v5 = parse("fb5"); let ok5 = (v5 === "5sinx" || v5 === "5sin(x)"); if (ok5) secB += 2; showStatus("chk_fb5", ok5, "5sin x");
+            let v6 = parse("fb6"); let ok6 = (v6 === "cosx" || v6 === "cos(x)" || v6 === "cos(-x)"); if (ok6) secB += 2; showStatus("chk_fb6", ok6, "cos x");
+
+            let raw7_1 = document.getElementById("fb7_1").value.toLowerCase();
+            let raw7_2 = document.getElementById("fb7_2").value.toLowerCase();
+            let isTranslation = (str) => str.includes("translate") && str.includes("right") && str.includes("3");
+            let isReflection = (str) => str.includes("reflect") && (str.includes("x-axis") || str.includes("x - axis"));
+            let ok7_1 = false; let ok7_2 = false;
+            if (isTranslation(raw7_1) && isReflection(raw7_2)) { ok7_1 = true; ok7_2 = true; } 
+            else if (isReflection(raw7_1) && isTranslation(raw7_2)) { ok7_1 = true; ok7_2 = true; } 
+            else {
+                if (isTranslation(raw7_1) || isReflection(raw7_1)) ok7_1 = true;
+                if (isTranslation(raw7_2) || isReflection(raw7_2)) ok7_2 = true;
+            }
+            if (isTranslation(raw7_1) && isTranslation(raw7_2)) { ok7_2 = false; } 
+            if (isReflection(raw7_1) && isReflection(raw7_2)) { ok7_2 = false; }
+            if (ok7_1) secB += 1; if (ok7_2) secB += 1;
+            document.getElementById("chk_fb7_1").textContent = ok7_1 ? "✓ Correct (1 Mark)" : "✗ Incorrect. Solution reference: 'translate to the right 3 units' or 'reflect about x-axis'.";
+            document.getElementById("chk_fb7_1").className = `text-[11px] font-bold block ${ok7_1 ? "text-green-600" : "text-red-600"}`;
+            document.getElementById("chk_fb7_2").textContent = ok7_2 ? "✓ Correct (1 Mark)" : "✗ Incorrect. Solution reference: 'translate to the right 3 units' or 'reflect about x-axis'.";
+            document.getElementById("chk_fb7_2").className = `text-[11px] font-bold block ${ok7_2 ? "text-green-600" : "text-red-600"}`;
+
+            let raw8 = document.getElementById("fb8").value.toLowerCase();
+            let clause1_ok = raw8.includes("enlarge") && raw8.includes("x-axis") && raw8.includes("2");
+            let clause2_ok = raw8.includes("translate") && raw8.includes("left") && raw8.includes("1");
+            let idx_enlarge = raw8.indexOf("enlarge");
+            let idx_translate = raw8.indexOf("translate");
+            let order_ok = (idx_enlarge !== -1 && idx_translate !== -1 && idx_enlarge < idx_translate);
+            let ok8 = clause1_ok && clause2_ok && order_ok;
+            if (ok8) secB += 2;
+            document.getElementById("chk_fb8").textContent = ok8 ? "✓ Correct (2 Marks)" : "✗ Incorrect. Order: enlarge along x-axis by 2, then translate left by 1.";
+            document.getElementById("chk_fb8").className = `text-[11px] font-bold block mt-1 ${ok8 ? "text-green-600" : "text-red-600"}`;
+
+            // Summary Display Setup
+            const totalScore = secA + secB;
+            document.getElementById("scoreValue").textContent = `${totalScore} / 38`;
+            
+            const card = document.getElementById("resultsCard");
+            card.classList.remove("hidden");
+            
+            const lbl = document.getElementById("commentLabel");
+            if (totalScore === 38) {
+                lbl.textContent = "🎯 Perfect Score! Outstanding command over mapping composite functions.";
+            } else if (totalScore >= 26) {
+                lbl.textContent = "👍 Excellent work! Review the specific sign conventions that fell short.";
+            } else {
+                lbl.textContent = "📚 Good attempt! Review transformation rules systematically.";
+            }
+
+            // 【新加入】獲取學生個人資料並異步傳送到後端 Sheet
+            const sClass = document.getElementById("studentClass").value;
+            const sClassNo = document.getElementById("studentClassNo").value;
+            const sName = document.getElementById("studentName").value;
+            submitDataToBackend(sClass, sClassNo, sName, totalScore);
+
+            // 鎖定表單防篡改
+            document.querySelectorAll("#quizForm select, #quizForm input").forEach(element => {
+                element.disabled = true;
+            });
+            document.getElementById("actionButtonsArea").classList.add("hidden");
+
+            alert(`🎉 Quiz Completed!\n\nYour Total Score: ${totalScore} / 38 Marks\n(Section A: ${secA} Marks, Section B: ${secB} Marks)\n\nAnswers have been locked and submitted.`);
+
+            card.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function clearForm() {
+            document.getElementById("quizForm").reset();
+            document.getElementById("resultsCard").classList.add("hidden");
+            for (let i = 1; i <= 9; i++) {
+                const outBox = document.getElementById(`ans_mc${i}`);
+                if (outBox) outBox.classList.add("hidden");
+            }
+            for (let j = 1; j <= 6; j++) document.getElementById(`chk_fb${j}`).textContent = "";
+            document.getElementById("chk_q10a_line").textContent = "";
+            document.getElementById("chk_q10a_roots").textContent = "";
+            document.getElementById("chk_q10b_line").textContent = "";
+            document.getElementById("chk_q10b_roots").textContent = "";
+            document.getElementById("chk_fb7_1").textContent = "";
+            document.getElementById("chk_fb7_2").textContent = "";
+            document.getElementById("chk_fb8").textContent = "";
+        }
+    </script>
+</body>
+</html>
