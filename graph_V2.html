@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>數學舞蹈家 (Mathematics Dancer)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+        }
+        h1 { color: #333; margin-top: 10px; margin-bottom: 25px; text-align: center; }
+        
+        /* 核心左右排版 */
+        .container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 25px;
+            max-width: 1400px;
+            width: 100%;
+        }
+
+        /* 左側選單固定寬度 */
+        .menu {
+            width: 420px;
+            min-width: 420px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-height: 750px;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        .main-item {
+            margin-bottom: 12px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .main-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            padding-left: 5px;
+        }
+        .sub-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .grid-8-layout {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+        }
+        .formula-btn {
+            padding: 10px 12px;
+            background-color: #ffffff;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            text-align: left;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .formula-btn:hover {
+            background-color: #e3f2fd;
+            border-color: #42a5f5;
+        }
+        .formula-btn.active {
+            background-color: #2196f3;
+            color: white;
+            border-color: #1e88e5;
+        }
+
+        .formula-btn sub, .main-title sub {
+            font-size: 11px;
+            vertical-align: sub;
+            bottom: -0.25em;
+        }
+
+        /* 右側展示區穩定並排 */
+        .display-area {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            align-items: center;
+            box-sizing: border-box;
+            flex-wrap: nowrap; /* 確保在桌機與 iPad 橫向時絕不換行 */
+            justify-content: center;
+        }
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .canvas-title {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #ffffff;
+            max-width: 100%;
+            height: auto;
+        }
+        .info-panel {
+            width: 100%;
+            max-width: 1300px;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #1e88e5;
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        /* ==========================================================================
+           修正：調整中斷點為 1023px
+           讓 iPad 橫向 (通常為 1024px ~ 1366px) 保持精美的左右排版！
+           只有當螢幕小於或等於 1023px (如 iPad 直向、手機) 時，才切換為上下排版。
+           ========================================================================== */
+        @media (max-width: 1023px) {
+            .container {
+                flex-direction: column; /* 直向平板與手機切換為上下排版 */
+                align-items: center;
+            }
+            .menu {
+                width: 100%;
+                min-width: 100%;
+                max-width: 840px;
+                max-height: 400px; /* 限制上方選單高度，避免霸佔整個螢幕 */
+            }
+            .display-area {
+                width: 100%;
+                max-width: 840px;
+                flex-wrap: wrap; /* 窄螢幕下允許內部畫布換行 */
+            }
+        }
+
+        /* 針對小螢幕智慧型手機的優化 */
+        @media (max-width: 600px) {
+            .display-area {
+                flex-direction: column; /* 手機上兩個畫布改為上下排 */
+                padding: 15px;
+            }
+            .grid-8-layout {
+                grid-template-columns: 1fr; /* 手機上8號公式按鈕改為單欄 */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>數學舞蹈家 (Mathematics Dancer)</h1>
+
+    <div class="container">
+        <div class="menu" id="menu"></div>
+
+        <div class="display-area">
+            <div class="canvas-container">
+                <div class="canvas-title">DANCER BODY</div>
+                <canvas id="dancerCanvas" width="300" height="400"></canvas>
+            </div>
+            <div class="canvas-container">
+                <div class="canvas-title">MATHEMATICAL GRAPH</div>
+                <canvas id="graphCanvas" width="480" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="info-panel" id="infoText">請選擇一個公式</div>
+
+    <script>
+        const SCALE_NORMAL = 40;
+        const SCALE_TRIG_X = 40 / 45; 
+        const SCALE_TRIG_Y = 40; 
+
+        const formulaData = [
+            {
+                title: "1. y = c where c is a constant",
+                options: [
+                    { name: "y = c (c = 2)", desc: "常數函數：雙手水平筆直舉起，呈現與 y=0 相同形狀的水平連貫橫線，高低隨常數動態調節，且與身體完美相連。", type: "c_pos" }
+                ]
+            },
+            {
+                title: "2. y = mx + c where m, c are constants",
+                options: [
+                    { name: "General: y = mx + c (m=0.5, c=1)", desc: "斜率較緩的直線：左右手連貫形成一條傾斜直線，即使函數未通過原點，雙手也緊接身體。", type: "line_gen" },
+                    { name: "In particular: y = x (m=1, c=0)", desc: "正比例直線：穿過脖子中心點的連貫 45° 斜線", type: "line_x" }
+                ]
+            },
+            {
+                title: "3. y = ax² + bx + c where a, b, c are constants",
+                options: [
+                    { name: "General: y = ax² + bx + c (a=0.5, b=-1, c=1)", desc: "二次拋物線：連貫流暢的 U 型曲線，頂點依函數位移，雙手依舊合攏接於身體。", type: "quad_gen" },
+                    { name: "In particular: y = x² (a=1, b=c=0)", desc: "標準二次拋物線：開口向上，連貫平滑地跨過身體中心點", type: "quad_x2" }
+                ]
+            },
+            {
+                title: "4. y = a(x - h)² + k where a, h, k are constants",
+                isGrid8: true,
+                options: [
+                    { name: "a>0, h>0, k>0 (a=0.5,h=2,k=1)", desc: "開口向上，平滑連貫頂點在第一象限", type: "v_ppp" },
+                    { name: "a>0, h>0, k<0 (a=0.5,h=2,k=-1)", desc: "開口向上，平滑連貫頂點在第四象限", type: "v_ppn" },
+                    { name: "a>0, h<0, k>0 (a=0.5,h=-2,k=1)", desc: "開口向上，平滑連貫頂點在第二象限", type: "v_pnp" },
+                    { name: "a>0, h<0, k<0 (a=0.5,h=-2,k=-1)", desc: "開口向上，平滑連貫頂點在第三象限", type: "v_pnn" },
+                    { name: "a<0, h>0, k>0 (a=-0.5,h=2,k=1)", desc: "開口向下，平滑連貫頂點在第一象限", type: "v_npp" },
+                    { name: "a<0, h>0, k<0 (a=-0.5,h=2,k=-1)", desc: "開口向下，平滑連貫頂點在第四象限", type: "v_npn" },
+                    { name: "a<0, h<0, k>0 (0.5,h=-2,k=1)", desc: "開口向下，平滑連貫頂點在第二象限", type: "v_nnp" },
+                    { name: "a<0, h<0, k<0 (0.5,h=-2,k=-1)", desc: "開口向下，平滑連貫頂點在第三象限", type: "v_nnn" }
+                ]
+            },
+            {
+                title: "5. y = ax³ + bx² + cx + d where a, b, c, d are constants",
+                options: [
+                    { name: "General: y = ax³ + bx² + cx + d (a=0.2, b=0.3, c=-1, d=-1)", desc: "一般三次曲線：流暢連貫不間斷的波動曲線", type: "cubic_gen" },
+                    { name: "In particular: y = x³ (a=1, b=c=d=0)", desc: "標準三次曲線：左手下擺、右手昂首沖天，展現完美立體經典 S 曲線孤度，在脖子中心點連貫過渡。", type: "cubic_x3" }
+                ]
+            },
+            {
+                title: "6. y = aˣ (a>1 or 0<a<1) where a is a constant",
+                options: [
+                    { name: "a > 1 (e.g., y = 2ˣ, a=2)", desc: "指數增長：手臂呈現 y = 2ˣ - 1，左手貼平漸近線，右手大弧度優美沖天，與肩膀完美相連不中斷。", type: "exp_growth" },
+                    { name: "0 < a < 1 (e.g., y = 0.5ˣ, a=0.5)", desc: "指數衰減：手臂呈現 y = 0.5ˣ - 1，左手高舉、右手順滑下落貼平，全線連貫一體不分開。", type: "exp_decay" }
+                ]
+            },
+            {
+                title: "7. log function",
+                options: [
+                    { htmlName: "y = log<sub>2</sub>(x) (a = 2)", desc: "對數增長：手臂呈現 y = log₂(x + 1)，左手向左下垂直延伸貼近漸近線，右手以超流暢大弧度朝右上抬升，與肩膀融為一體。", type: "log_growth" },
+                    { htmlName: "y = log<sub>0.5</sub>(x) (a = 2, 1/a = 0.5)", desc: "對數衰減：手臂呈現 y = log₀.₅(x + 1)，左手向左上垂直延伸，右手以流暢大弧度朝右下方滑落，全線連貫不斷開。", type: "log_decay" }
+                ]
+            },
+            {
+                title: "9. y = sin x",
+                options: [
+                    { name: "y = sin x", desc: "正弦波：左右手與身體連成一條完整的 S 型波浪，過渡自然不斷開", type: "sin" }
+                ]
+            },
+            {
+                title: "10. y = cos x",
+                options: [
+                    { name: "y = cos x", desc: "餘弦波：手臂呈現 y = cos x - 1，波峰(0)精準對齊肩膀中心，雙手往兩側對稱順滑下垂，與身體融為一體。", type: "cos" }
+                ]
+            },
+            {
+                title: "11. y = tan x",
+                options: [
+                    { name: "y = tan x", desc: "正切曲線：雙手與身體緊密連接，呈現中軸對稱且中央連貫不斷開的舞蹈波形", type: "tan" }
+                ]
+            },
+            {
+                title: "12. x² + y² = a² (a = 2)",
+                options: [
+                    { name: "x² + y² = a² (a = 2)", desc: "圓形：雙手在頭頂上方完美合攏，形成與頭部同心的連貫大圓圈", type: "circle" }
+                ]
+            }
+        ];
+
+        const dancerCanvas = document.getElementById('dancerCanvas');
+        const dCtx = dancerCanvas.getContext('2d');
+        const graphCanvas = document.getElementById('graphCanvas');
+        const gCtx = graphCanvas.getContext('2d');
+        const infoText = document.getElementById('infoText');
+
+        // 生成選單 UI
+        const menuContainer = document.getElementById('menu');
+        formulaData.forEach(group => {
+            const mainDiv = document.createElement('div');
+            mainDiv.className = 'main-item';
+            
+            const title = document.createElement('div');
+            title.className = 'main-title';
+            title.innerHTML = group.title;
+            mainDiv.appendChild(title);
+
+            const subGroup = document.createElement('div');
+            subGroup.className = group.isGrid8 ? 'sub-group grid-8-layout' : 'sub-group';
+
+            group.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'formula-btn';
+                if(opt.htmlName) btn.innerHTML = opt.htmlName;
+                else btn.innerText = opt.name;
+                
+                btn.onclick = () => {
+                    document.querySelectorAll('.formula-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    renderAll(opt);
+                };
+                subGroup.appendChild(btn);
+            });
+
+            mainDiv.appendChild(subGroup);
+            menuContainer.appendChild(mainDiv);
+        });
+
+        function drawGrid(ctx, w, h, isTrig) {
+            ctx.clearRect(0, 0, w, h);
+            const gridSize = 40; 
+            const centerX = w / 2; 
+            const centerY = h / 2; 
+
+            ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1;
+            for(let x=0; x<=w; x+=gridSize) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+            for(let y=0; y<=h; y+=gridSize) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+            
+            ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(0, centerY); ctx.lineTo(w, centerY); ctx.stroke(); 
+            ctx.beginPath(); ctx.moveTo(centerX, 0); ctx.lineTo(centerX, h); ctx.stroke(); 
+
+            ctx.fillStyle = '#475569'; ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.5;
+            ctx.font = '11px "Segoe UI", sans-serif';
+
+            ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+            for (let i = 1; centerY - i * gridSize > 0; i++) {
+                let yPos = centerY - i * gridSize;
+                ctx.beginPath(); ctx.moveTo(centerX - 4, yPos); ctx.lineTo(centerX, yPos); ctx.stroke();
+                ctx.fillText(i, centerX - 8, yPos);
+            }
+            for (let i = 1; centerY + i * gridSize < h; i++) {
+                let yPos = centerY + i * gridSize;
+                ctx.beginPath(); ctx.moveTo(centerX - 4, yPos); ctx.lineTo(centerX, yPos); ctx.stroke();
+                ctx.fillText(-i, centerX - 8, yPos);
+            }
+
+            ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+            if (isTrig) {
+                for (let i = 1; centerX + i * gridSize < w; i++) {
+                    let xPos = centerX + i * gridSize; let angle = i * 45;
+                    ctx.beginPath(); ctx.moveTo(xPos, centerY); ctx.lineTo(xPos, centerY + 4); ctx.stroke();
+                    ctx.fillText(angle + '°', xPos, centerY + 8);
+                }
+                for (let i = 1; centerX - i * gridSize > 0; i++) {
+                    let xPos = centerX - i * gridSize; let angle = -i * 45;
+                    ctx.beginPath(); ctx.moveTo(xPos, centerY); ctx.lineTo(xPos, centerY + 4); ctx.stroke();
+                    ctx.fillText(angle + '°', xPos, centerY + 8);
+                }
+            } else {
+                for (let i = 1; centerX + i * gridSize < w; i++) {
+                    let xPos = centerX + i * gridSize;
+                    ctx.beginPath(); ctx.moveTo(xPos, centerY); ctx.lineTo(xPos, centerY + 4); ctx.stroke();
+                    ctx.fillText(i, xPos, centerY + 8);
+                }
+                for (let i = 1; centerX - i * gridSize > 0; i++) {
+                    let xPos = centerX - i * gridSize;
+                    ctx.beginPath(); ctx.moveTo(xPos, centerY); ctx.lineTo(xPos, centerY + 4); ctx.stroke();
+                    ctx.fillText(-i, xPos, centerY + 8);
+                }
+            }
+            ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+            ctx.fillText('0', centerX - 6, centerY + 6);
+
+            ctx.fillStyle = '#1e293b'; ctx.font = 'bold 14px "Segoe UI", sans-serif';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('X', w - 15, centerY + 20);
+            ctx.fillText('Y', centerX - 15, 15);
+        }
+
+        function plot(ctx, w, h, mathX, mathY, isFirst, isTrig) {
+            const scaleX = isTrig ? SCALE_TRIG_X : SCALE_NORMAL;
+            const scaleY = SCALE_NORMAL; 
+            const cx = w / 2 + (mathX * scaleX);
+            const cy = h / 2 - (mathY * scaleY);
+            if (isFirst) ctx.moveTo(cx, cy);
+            else ctx.lineTo(cx, cy);
+        }
+
+        const sBaseX = 150; const sBaseY = 180;
+
+        function drawDancerBase() {
+            dCtx.clearRect(0, 0, dancerCanvas.width, dancerCanvas.height);
+            dCtx.strokeStyle = '#f1f5f9'; dCtx.lineWidth = 1;
+            for(let i=0; i<300; i+=40) { dCtx.beginPath(); dCtx.moveTo(i,0); dCtx.lineTo(i,400); dCtx.stroke(); }
+            for(let i=0; i<400; i+=40) { dCtx.beginPath(); dCtx.moveTo(0,i); dCtx.lineTo(300,i); dCtx.stroke(); }
+
+            dCtx.lineWidth = 4; dCtx.strokeStyle = '#334155'; dCtx.fillStyle = '#ffffff';
+            dCtx.beginPath(); dCtx.arc(sBaseX, sBaseY - 25, 18, 0, Math.PI * 2); dCtx.stroke(); dCtx.fill();
+            dCtx.fillStyle = '#334155';
+            dCtx.beginPath(); dCtx.arc(sBaseX - 6, sBaseY - 28, 2.5, 0, Math.PI * 2); dCtx.fill();
+            dCtx.beginPath(); dCtx.arc(sBaseX + 6, sBaseY - 28, 2.5, 0, Math.PI * 2); dCtx.fill();
+            dCtx.beginPath(); dCtx.arc(sBaseX, sBaseY - 23, 7, 0, Math.PI, false); dCtx.stroke();
+
+            dCtx.lineWidth = 4;
+            dCtx.beginPath(); dCtx.moveTo(sBaseX, sBaseY); dCtx.lineTo(sBaseX, sBaseY + 80); dCtx.stroke();
+            dCtx.beginPath(); dCtx.moveTo(sBaseX, sBaseY + 80); dCtx.lineTo(sBaseX - 25, sBaseY + 160); dCtx.stroke();
+            dCtx.beginPath(); dCtx.moveTo(sBaseX, sBaseY + 80); dCtx.lineTo(sBaseX + 25, sBaseY + 160); dCtx.stroke();
+        }
+
+        function renderAll(opt) {
+            const type = opt.type;
+            const isTrig = (type === 'sin' || type === 'cos' || type === 'tan');
+            const graphW = graphCanvas.width;
+            const graphH = graphCanvas.height;
+
+            infoText.innerText = opt.desc;
+            drawGrid(gCtx, graphW, graphH, isTrig);
+            drawDancerBase();
+
+            dCtx.strokeStyle = '#007fff'; dCtx.lineWidth = 6; dCtx.lineCap = 'round'; dCtx.lineJoin = 'round';
+            gCtx.strokeStyle = '#ef4444'; gCtx.lineWidth = 3;
+
+            if (type === 'c_pos') {
+                gCtx.beginPath(); for(let x=-6; x<=6; x+=0.1) plot(gCtx, graphW, graphH, x, 2, x===-6, false); gCtx.stroke();
+            } 
+            else if (type === 'line_gen') {
+                gCtx.beginPath(); for(let x=-6; x<=6; x+=0.1) plot(gCtx, graphW, graphH, x, 0.5*x + 1, x===-6, false); gCtx.stroke();
+            } 
+            else if (type === 'line_x') {
+                gCtx.beginPath(); for(let x=-6; x<=6; x+=0.1) plot(gCtx, graphW, graphH, x, x, x===-6, false); gCtx.stroke();
+            } 
+            else if (type === 'quad_gen') {
+                gCtx.beginPath(); for(let x=-6; x<=6; x+=0.1) plot(gCtx, graphW, graphH, x, 0.5*x*x - x + 1, x===-6, false); gCtx.stroke();
+            }
+            else if (type === 'quad_x2') {
+                gCtx.beginPath(); for(let x=-6; x<=6; x+=0.1) plot(gCtx, graphW, graphH, x, x*x, x===-6, false); gCtx.stroke();
+            } 
+            else if (type.startsWith('v_')) {
+                let isA = type[2] === 'p'; let isH = type[3] === 'p'; let isK = type[4] === 'p';
+                let a = isA ? 0.5 : -0.5; let h = isH ? 2 : -2; let k = isK ? 1 : -1;
+                gCtx.beginPath(); for(let x=-6; x<=6; x+=0.1) plot(gCtx, graphW, graphH, x, a * Math.pow(x - h, 2) + k, x===-6, false); gCtx.stroke();
+            } 
+            else if (type === 'cubic_gen') {
+                gCtx.beginPath(); for(let x=-6; x<=6; x+=0.1) plot(gCtx, graphW, graphH, x, 0.2*x*x*x + 0.3*x*x - x - 1, x===-6, false); gCtx.stroke();
+            }
+            else if (type === 'cubic_x3') {
+                gCtx.beginPath(); for(let x=-6; x<=6; x+=0.1) plot(gCtx, graphW, graphH, x, 0.5*x*x*x, x===-6, false); gCtx.stroke();
+            }
+            else if (type === 'exp_growth') {
+                gCtx.beginPath(); for(let x=-6; x<=2.5; x+=0.1) plot(gCtx, graphW, graphH, x, Math.pow(2, x), x===-6, false); gCtx.stroke();
+            } 
+            else if (type === 'exp_decay') {
+                gCtx.beginPath(); for(let x=-2.5; x<=6; x+=0.1) plot(gCtx, graphW, graphH, x, Math.pow(0.5, x), x===-2.5, false); gCtx.stroke();
+            } 
+            else if (type === 'log_growth') {
+                gCtx.beginPath(); for(let x=0.05; x<=6; x+=0.05) plot(gCtx, graphW, graphH, x, Math.log2(x), x===0.05, false); gCtx.stroke();
+            } 
+            else if (type === 'log_decay') {
+                gCtx.beginPath(); for(let x=0.05; x<=6; x+=0.05) plot(gCtx, graphW, graphH, x, -Math.log2(x), x===0.05, false); gCtx.stroke();
+            } 
+            else if (type === 'sin') {
+                gCtx.beginPath(); for(let deg=-270; deg<=270; deg+=2) { let rad = (deg * Math.PI) / 180; plot(gCtx, graphW, graphH, deg, Math.sin(rad), deg===-270, true); } gCtx.stroke();
+            } 
+            else if (type === 'cos') {
+                gCtx.beginPath(); for(let deg=-270; deg<=270; deg+=2) { let rad = (deg * Math.PI) / 180; plot(gCtx, graphW, graphH, deg, Math.cos(rad), deg===-270, true); } gCtx.stroke();
+            } 
+            else if (type === 'tan') {
+                gCtx.beginPath(); let firstPoint = true;
+                for(let deg=-270; deg<=270; deg+=1) {
+                    if (Math.abs(deg % 180) === 90) { firstPoint = true; continue; }
+                    let rad = (deg * Math.PI) / 180; let y = Math.tan(rad);
+                    if(Math.abs(y) <= 4.5) { plot(gCtx, graphW, graphH, deg, y, firstPoint, true); firstPoint = false; } else { firstPoint = true; }
+                }
+                gCtx.stroke();
+            } 
+            else if (type === 'circle') {
+                gCtx.beginPath(); gCtx.arc(graphW / 2, graphH / 2, 2 * SCALE_NORMAL, 0, Math.PI * 2); gCtx.stroke();
+            }
+
+            // 繪製卡通人物雙手臂
+            if (type === 'c_pos') {
+                dCtx.beginPath(); dCtx.moveTo(sBaseX - 75, sBaseY); dCtx.lineTo(sBaseX + 75, sBaseY); dCtx.stroke();
+            } 
+            else if (type === 'line_gen') {
+                dCtx.beginPath(); dCtx.moveTo(sBaseX - 70, sBaseY + 25); dCtx.lineTo(sBaseX, sBaseY); dCtx.lineTo(sBaseX + 70, sBaseY - 25); dCtx.stroke();
+            } 
+            else if (type === 'line_x') {
+                dCtx.beginPath(); dCtx.moveTo(sBaseX - 65, sBaseY + 55); dCtx.lineTo(sBaseX, sBaseY); dCtx.lineTo(sBaseX + 65, sBaseY - 55); dCtx.stroke();
+            } 
+            else if (type === 'quad_x2') {
+                dCtx.beginPath(); dCtx.moveTo(sBaseX - 70, sBaseY - 45); dCtx.quadraticCurveTo(sBaseX, sBaseY + 35, sBaseX + 70, sBaseY - 45); dCtx.stroke();
+            } 
+            else if (type === 'quad_gen') {
+                dCtx.beginPath(); dCtx.moveTo(sBaseX - 60, sBaseY - 20); dCtx.quadraticCurveTo(sBaseX, sBaseY + 35, sBaseX + 70, sBaseY - 55); dCtx.stroke();
+            }
+            else if (type.startsWith('v_')) {
+                let isA = type[2] === 'p'; let isH = type[3] === 'p'; let isK = type[4] === 'p';
+                let offsetX = (isH ? 2 : -2) * 12; let offsetY = (isK ? 1 : -1) * -12;
+                dCtx.beginPath(); dCtx.moveTo(sBaseX, sBaseY);
+                if (isA) {
+                    dCtx.quadraticCurveTo(sBaseX + offsetX, sBaseY + 35 + offsetY, sBaseX + 65 + offsetX, sBaseY - 35 + offsetY);
+                    dCtx.moveTo(sBaseX, sBaseY); dCtx.quadraticCurveTo(sBaseX + offsetX, sBaseY + 35 + offsetY, sBaseX - 65 + offsetX, sBaseY - 35 + offsetY);
+                } else {
+                    dCtx.quadraticCurveTo(sBaseX + offsetX, sBaseY - 25 + offsetY, sBaseX + 65 + offsetX, sBaseY + 45 + offsetY);
+                    dCtx.moveTo(sBaseX, sBaseY); dCtx.quadraticCurveTo(sBaseX + offsetX, sBaseY - 25 + offsetY, sBaseX - 65 + offsetX, sBaseY + 45 + offsetY);
+                }
+                dCtx.stroke();
+            }
+            else if (type === 'cubic_x3') {
+                dCtx.beginPath(); dCtx.moveTo(sBaseX - 65, sBaseY + 70); dCtx.bezierCurveTo(sBaseX - 55, sBaseY - 35, sBaseX + 55, sBaseY + 35, sBaseX + 65, sBaseY - 70); dCtx.stroke();
+            }
+            else if (type === 'cubic_gen') {
+                dCtx.beginPath(); dCtx.moveTo(sBaseX - 65, sBaseY + 40); dCtx.bezierCurveTo(sBaseX - 30, sBaseY - 20, sBaseX + 20, sBaseY + 30, sBaseX + 65, sBaseY - 45); dCtx.stroke();
+            }
+            else if (type === 'exp_growth') {
+                dCtx.beginPath(); dCtx.moveTo(sBaseX - 75, sBaseY + 35); dCtx.bezierCurveTo(sBaseX - 30, sBaseY + 30, sBaseX - 5, sBaseY, sBaseX + 65, sBaseY - 75); dCtx.stroke();
+            } 
+            else if (type === 'exp_decay') {
+                dCtx.beginPath(); dCtx.moveTo(sBaseX - 65, sBaseY - 75); dCtx.bezierCurveTo(sBaseX + 5, sBaseY, sBaseX + 30, sBaseY + 30, sBaseX + 75, sBaseY + 35); dCtx.stroke();
+            } 
+            else if (type === 'log_growth') {
+                dCtx.beginPath(); dCtx.moveTo(sBaseX - 30, sBaseY + 75); dCtx.bezierCurveTo(sBaseX - 25, sBaseY + 20, sBaseX + 25, sBaseY - 30, sBaseX + 75, sBaseY - 48); dCtx.stroke();
+            } 
+            else if (type === 'log_decay') {
+                dCtx.beginPath(); dCtx.moveTo(sBaseX - 30, sBaseY - 75); dCtx.bezierCurveTo(sBaseX - 25, sBaseY - 20, sBaseX + 25, sBaseY + 30, sBaseX + 75, sBaseY + 48); dCtx.stroke();
+            } 
+            else if (type === 'sin') {
+                dCtx.beginPath(); dCtx.moveTo(sBaseX - 75, sBaseY + 25); dCtx.bezierCurveTo(sBaseX - 35, sBaseY + 65, sBaseX + 35, sBaseY - 65, sBaseX + 75, sBaseY - 25); dCtx.stroke();
+            } 
+            else if (type === 'cos') {
+                dCtx.beginPath(); dCtx.moveTo(sBaseX - 75, sBaseY + 60); dCtx.bezierCurveTo(sBaseX - 35, sBaseY, sBaseX + 35, sBaseY, sBaseX + 75, sBaseY + 60); dCtx.stroke();
+            } 
+            else if (type === 'tan') {
+                dCtx.beginPath(); dCtx.moveTo(sBaseX, sBaseY); dCtx.quadraticCurveTo(sBaseX - 35, sBaseY + 10, sBaseX - 55, sBaseY + 75); dCtx.moveTo(sBaseX, sBaseY); dCtx.quadraticCurveTo(sBaseX + 35, sBaseY - 10, sBaseX + 55, sBaseY - 75); dCtx.stroke();
+            } 
+            else if (type === 'circle') {
+                dCtx.beginPath(); dCtx.arc(sBaseX, sBaseY - 25, 32, 0, Math.PI * 2); dCtx.stroke();
+            }
+        }
+
+        window.onload = () => {
+            document.querySelector('.formula-btn').click();
+        };
+    </script>
+</body>
+</html>
