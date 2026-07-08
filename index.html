@@ -80,6 +80,7 @@
             font-weight: 600;
             transition: all 0.25s ease; /* 讓滑鼠移過時的動畫變平滑 */
             box-shadow: 0 2px 5px rgba(0,0,0,0.01);
+            cursor: pointer;
         }
 
         /* 滑鼠移到卡片上的變色效果 */
@@ -127,9 +128,27 @@
         <li><a href="graphdance.html">數學舞蹈家 Math Dance</a></li>
         <li><a href="TwoTransformation.html">Two Transformation Exercise</a></li>
         <li><a href="Transformation-DSE-Long-Questions.html">Transformation - DSE Long Questions</a></li>
-        <li><a href="Transformation-Quiz.html">Transformation - Quiz</a></li>
+        <li><a onclick="checkQuizPassword()">Transformation - Quiz</a></li>
     </ol>
 </div>
+
+<script>
+    function checkQuizPassword() {
+        // 設定正確密碼
+        const correctPassword = "ILoveMath";
+        
+        // 彈出密碼輸入框
+        let userInput = prompt("請輸入訪問密碼以進入 Quiz：");
+        
+        if (userInput === correctPassword) {
+            // 密碼正確，跳轉到測驗頁面
+            window.location.href = "Transformation-Quiz.html";
+        } else if (userInput !== null) {
+            // 密碼錯誤（且不是點擊取消）
+            alert("密碼錯誤！無法檢視試卷。");
+        }
+    }
+</script>
 
 </body>
 </html>
