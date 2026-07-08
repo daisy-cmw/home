@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HKDSE Graph Transformations - Step-by-Step Dashboard</title>
+    
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['$$', '$$']],
+                processEscapes: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --brand-primary: #1e3a8a;
+            --brand-secondary: #3b82f6;
+            --bg-canvas: #f8fafc;
+            --bg-surface: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border-color: #cbd5e1;
+            --success-color: #16a34a;
+            --accent-hint: #b45309;
+            --scheme-color: #6b21a8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-canvas);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 24px;
+        }
+
+        .dashboard-container {
+            max-width: 950px;
+            margin: 0 auto;
+            background: var(--bg-surface);
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            color: var(--brand-primary);
+            font-size: 2rem;
+            margin-top: 0;
+            border-bottom: 3px solid var(--brand-secondary);
+            padding-bottom: 12px;
+        }
+
+        .master-tracker {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-left: 5px solid var(--brand-secondary);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .bar-container {
+            background: #e2e8f0;
+            height: 10px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .bar-fill {
+            background: var(--success-color);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .navigation-tabs {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 6px;
+            margin-bottom: 25px;
+        }
+
+        .tab-trigger {
+            background: #f1f5f9;
+            border: 1px solid var(--border-color);
+            padding: 10px 18px;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .tab-trigger.is-active {
+            background: var(--brand-primary);
+            color: #ffffff;
+            border-color: var(--brand-primary);
+        }
+
+        .question-wrapper {
+            display: none;
+        }
+
+        .question-wrapper.is-active {
+            display: block;
+        }
+
+        .prompt-panel {
+            background: #f1f5f9;
+            border-left: 4px solid var(--brand-primary);
+            padding: 16px;
+            border-radius: 0 8px 8px 0;
+            font-size: 1.05rem;
+            margin-bottom: 20px;
+        }
+
+        .segment-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+
+        .segment-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: var(--brand-primary);
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .control-btn {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-right: 6px;
+            transition: all 0.15s;
+            color: var(--text-muted);
+        }
+
+        .control-btn:hover {
+            background: #f1f5f9;
+            color: var(--text-main);
+        }
+
+        .reveal-btn {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #2563eb;
+        }
+        
+        .reveal-btn:hover {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .scheme-btn {
+            background-color: var(--scheme-color);
+            color: white;
+            border-color: #581c87;
+        }
+
+        .scheme-btn:hover {
+            background-color: #581c87;
+        }
+
+        .panel-hint {
+            display: none;
+            margin-top: 12px;
+            padding: 12px;
+            background-color: #fef3c7;
+            border-left: 4px solid var(--accent-hint);
+            color: #78350f;
+            font-size: 0.9rem;
+            border-radius: 4px;
+        }
+
+        .panel-solution {
+            display: block;
+            margin-top: 12px;
+            padding: 14px;
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 6px;
+            color: #14532d;
+        }
+
+        .solution-step {
+            display: none;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed rgba(20, 83, 45, 0.15);
+        }
+
+        .solution-step:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .step-label {
+            font-weight: bold;
+            color: #16a34a;
+            margin-right: 6px;
+        }
+
+        .marking-scheme-img {
+            display: none;
+            max-width: 100%;
+            height: auto;
+            margin-top: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .completion-gate {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f8fafc;
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .completion-gate input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <h1>HKDSE Long Questions Matrix: Transformation of Graphs</h1>
+    
+    <div class="master-tracker">
+        <div><strong>Progress Monitor: <span id="tracker-status">0 / 5 Sections Finished</span></strong></div>
+        <div class="bar-container"><div class="bar-fill" id="tracker-bar"></div></div>
+    </div>
+
+    <div class="navigation-tabs">
+        <button class="tab-trigger is-active" onclick="handleTabSwitch(0)">2015 Q18</button>
+        <button class="tab-trigger" onclick="handleTabSwitch(1)">2016 Q18</button>
+        <button class="tab-trigger" onclick="handleTabSwitch(2)">2019 Q19</button>
+        <button class="tab-trigger" onclick="handleTabSwitch(3)">2024 Q19</button>
+        <button class="tab-trigger" onclick="handleTabSwitch(4)">2025 Q18</button>
+    </div>
+
+    <div class="question-wrapper is-active" id="block-0">
+        <h2>2015-Q18 (9 Marks)</h2>
+        <div class="prompt-panel">
+            Let \(f(x) = 2x^2 - 4kx + 3k^2 + 5\), where \(k\) is a real constant.
+        </div>
+        
+        <div class="segment-card">
+            <div class="segment-title"><span>a) Does the graph of \(y = f(x)\) cut the \(x\)-axis? Explain your answer.</span> <span>[2 Marks]</span></div>
+            <button class="control-btn" onclick="toggleDisplay('hint-15a')">💡 Strategy Hint</button>
+            <button class="control-btn reveal-btn" id="btn-sol-15a" onclick="revealNextStep('sol-15a')">➡️ Show Step 1</button>
+            
+            <div class="panel-hint" id="hint-15a">Check the sign of the quadratic discriminant \(\Delta = b^2 - 4ac\).</div>
+            
+            <div class="panel-solution" id="sol-15a" data-current-step="0">
+                <div class="solution-step"><span class="step-label">Step 1.</span>Set coefficients: \(a = 2\), \(b = -4k\), \(c = 3k^2 + 5\).</div>
+                <div class="solution-step"><span class="step-label">Step 2.</span>Discriminant calculation:
+                    $$\Delta = (-4k)^2 - 4(2)(3k^2 + 5) = 16k^2 - 24k^2 - 40 = -8k^2 - 40$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 3.</span>Sign test: Since \(-8k^2 \le 0\) for all real \(k\), then \(-8k^2 - 40 \le -40 < 0\).</div>
+                <div class="solution-step"><span class="step-label">Step 4.</span>Conclusion: Since \(\Delta < 0\), the graph <strong>never cuts the \(x\)-axis</strong>.</div>
+            </div>
+        </div>
+
+        <div class="segment-card">
+            <div class="segment-title"><span>b) Using the method of completing the square, express, in terms of \(k\), the coordinates of the vertex of the graph of \(y = f(x)\).</span> <span>[3 Marks]</span></div>
+            <button class="control-btn" onclick="toggleDisplay('hint-15b')">💡 Strategy Hint</button>
+            <button class="control-btn reveal-btn" id="btn-sol-15b" onclick="revealNextStep('sol-15b')">➡️ Show Step 1</button>
+            
+            <div class="panel-hint" id="hint-15b">Factor out the leading scalar coefficient 2 before completing the perfect square square.</div>
+            
+            <div class="panel-solution" id="sol-15b" data-current-step="0">
+                <div class="solution-step"><span class="step-label">Step 1.</span>Factorize 2 out:
+                    $$f(x) = 2(x^2 - 2kx) + 3k^2 + 5$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 2.</span>+ and - balance terms:
+                    $$f(x) = 2(x^2 - 2kx + k^2 - k^2) + 3k^2 + 5$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 3.</span>Simplify form:
+                    $$f(x) = 2(x - k)^2 - 2k^2 + 3k^2 + 5 = 2(x - k)^2 + k^2 + 5$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 4.</span>By vertex form: Vertex = <strong>\((k, k^2 + 5)\)</strong>.</div>
+            </div>
+        </div>
+
+        <div class="segment-card">
+            <div class="segment-title"><span>c) In the same rectangular coordinate system, let \(S\) and \(T\) be moving points on the graph of \(y = f(x)\) and the graph of \(y = 2 - f(x)\) respectively. Denote the origin by \(O\). Someone claims that when \(S\) and \(T\) are nearest to each other, the circumcentre of \(\Delta OST\) lies on the \(x\)-axis. Is the claim correct? Explain your answer.</span> <span>[4 Marks]</span></div>
+            <button class="control-btn" onclick="toggleDisplay('hint-15c')">💡 Strategy Hint</button>
+            <button class="control-btn reveal-btn" id="btn-sol-15c" onclick="revealNextStep('sol-15c')">➡️ Show Step 1</button>
+            
+            <div class="panel-hint" id="hint-15c">Graphs are reflections of each other. Find the midpoint and equation of the perpendicular bisector line.</div>
+            
+            <div class="panel-solution" id="sol-15c" data-current-step="0">
+                <div class="solution-step"><span class="step-label">Step 1.</span>Points \(S\) and \(T\) are closest at their respective vertices. Vertex \(S = (k, k^2 + 5)\).</div>
+                <div class="solution-step"><span class="step-label">Step 2.</span>Find profile of \(y = 2 - f(x)\):
+                    $$y = 2 - [2(x - k)^2 + k^2 + 5] = -2(x - k)^2 - k^2 - 3$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 3.</span>Vertex \(T = (k, -k^2 - 3)\). Line segment \(ST\) is purely vertical because both share \(x = k\).</div>
+                <div class="solution-step"><span class="step-label">Step 4.</span>Midpoint of \(ST\):
+                    $$\text{Midpoint } y = \frac{(k^2 + 5) + (-k^2 - 3)}{2} = \frac{2}{2} = 1 \implies (k, 1)$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 5.</span>Perpendicular bisector equation: Horizontal line <strong>\(y = 1\)</strong>.</div>
+                <div class="solution-step"><span class="step-label">Step 6.</span>Conclusion: The circumcentre must lie on \(y = 1\), so it can never lie on the \(x\)-axis (\(y = 0\)). Claim is <strong>incorrect</strong>.</div>
+            </div>
+        </div>
+
+        <div class="segment-card">
+            <div class="segment-title"><span>d) Answer Checking</span></div>
+            <button class="control-btn scheme-btn" onclick="toggleMarkingScheme(this, 'img-scheme-15')">📸 Show Marking Scheme</button>
+            <img id="img-scheme-15" class="marking-scheme-img" src="2015-Q18_Sol.png" alt="2015 Q18 Marking Scheme">
+        </div>
+
+        <div class="completion-gate">
+            <input type="checkbox" id="gate-0" onclick="evaluateProgress()">
+            <label for="gate-0">Mark 2015 Q18 as Complete</label>
+        </div>
+    </div>
+
+    <div class="question-wrapper" id="block-1">
+        <h2>2016-Q18 (6 Marks)</h2>
+        <div class="prompt-panel">
+            Let \(f(x) = -\frac{1}{3}x^2 + 12x - 121\).
+        </div>
+
+        <div class="segment-card">
+            <div class="segment-title"><span>a) Using the method of completing the square, find the coordinates of the vertex of the graph of \(y = f(x)\).</span> <span>[2 Marks]</span></div>
+            <button class="control-btn" onclick="toggleDisplay('hint-16a')">💡 Strategy Hint</button>
+            <button class="control-btn reveal-btn" id="btn-sol-16a" onclick="revealNextStep('sol-16a')">➡️ Show Step 1</button>
+            
+            <div class="panel-hint" id="hint-16a">Factor out the fractional term -1/3 from the first two parts carefully.</div>
+            
+            <div class="panel-solution" id="sol-16a" data-current-step="0">
+                <div class="solution-step"><span class="step-label">Step 1.</span>Factorize \(-\frac{1}{3}\) out:
+                    $$f(x) = -\frac{1}{3}(x^2 - 36x) - 121$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 2.</span>+ and - balance terms:
+                    $$f(x) = -\frac{1}{3}(x^2 - 36x + 18^2 - 18^2) - 121$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 3.</span>Simplify form:
+                    $$f(x) = -\frac{1}{3}(x - 18)^2 + 108 - 121 = -\frac{1}{3}(x - 18)^2 - 13$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 4.</span>By vertex form: Vertex = <strong>\((18, -13)\)</strong>.</div>
+            </div>
+        </div>
+
+        <div class="segment-card">
+            <div class="segment-title"><span>b) The graph of \(y = g(x)\) is obtained by translating the graph of \(y = f(x)\) vertically. If the graph of \(y = g(x)\) touches the \(x\)-axis, find \(g(x)\).</span> <span>[2 Marks]</span></div>
+            <button class="control-btn" onclick="toggleDisplay('hint-16b')">💡 Strategy Hint</button>
+            <button class="control-btn reveal-btn" id="btn-sol-16b" onclick="revealNextStep('sol-16b')">➡️ Show Step 1</button>
+            
+            <div class="panel-hint" id="hint-16b">To touch the x-axis, the vertex y-coordinate output must be brought directly up to 0.</div>
+            
+            <div class="panel-solution" id="sol-16b" data-current-step="0">
+                <div class="solution-step"><span class="step-label">Step 1.</span>Target vertex format must become \((18, 0)\).</div>
+                <div class="solution-step"><span class="step-label">Step 2.</span>Shift graph up 13 units to cancel out the current height of \(-13\).</div>
+                <div class="solution-step"><span class="step-label">Step 3.</span>Result equation: <strong>\(g(x) = f(x) + 13 = -\frac{1}{3}(x - 18)^2\)</strong>.</div>
+            </div>
+        </div>
+
+        <div class="segment-card">
+            <div class="segment-title"><span>c) Under a transformation, \(f(x)\) is changed to \(-\frac{1}{3}x^2 - 12x - 121\). Describe the geometric meaning of the transformation.</span> <span>[2 Marks]</span></div>
+            <button class="control-btn" onclick="toggleDisplay('hint-16c')">💡 Strategy Hint</button>
+            <button class="control-btn reveal-btn" id="btn-sol-16c" onclick="revealNextStep('sol-16c')">➡️ Show Step 1</button>
+            
+            <div class="panel-hint" id="hint-16c">Evaluate what substitution rule gives this updated middle term sign change.</div>
+            
+            <div class="panel-solution" id="sol-16c" data-current-step="0">
+                <div class="solution-step"><span class="step-label">Step 1.</span>Substitute \(x \to -x\) into the original function:
+                    $$f(-x) = -\frac{1}{3}(-x)^2 + 12(-x) - 121 = -\frac{1}{3}x^2 - 12x - 121$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 2.</span>Geometric meaning: Since internal \(x\) inverted signs, the graph is <strong>reflected about the \(y\)-axis</strong>.</div>
+            </div>
+        </div>
+
+        <div class="segment-card">
+            <div class="segment-title"><span>d) Answer Checking</span></div>
+            <button class="control-btn scheme-btn" onclick="toggleMarkingScheme(this, 'img-scheme-16')">📸 Show Marking Scheme</button>
+            <img id="img-scheme-16" class="marking-scheme-img" src="2016-Q18_Sol.png" alt="2016 Q18 Marking Scheme">
+        </div>
+
+        <div class="completion-gate">
+            <input type="checkbox" id="gate-1" onclick="evaluateProgress()">
+            <label for="gate-1">Mark 2016 Q18 as Complete</label>
+        </div>
+    </div>
+
+    <div class="question-wrapper" id="block-2">
+        <h2>2019-Q19 (12 Marks)</h2>
+        <div class="prompt-panel">
+            Let \(f(x) = \frac{1}{1+k}[x^2 + (6k-2)x + (9k+25)]\), where \(k\) is a positive constant. Denote the point \((4, 33)\) by \(F\).
+        </div>
+
+        <div class="segment-card">
+            <div class="segment-title"><span>a) Prove that the graph of \(y = f(x)\) passes through \(F\).</span> <span>[1 Mark]</span></div>
+            <button class="control-btn reveal-btn" id="btn-sol-19a" onclick="revealNextStep('sol-19a')">➡️ Show Step 1</button>
+            
+            <div class="panel-solution" id="sol-19a" data-current-step="0">
+                <div class="solution-step"><span class="step-label">Step 1.</span>Substitute \(x = 4\) into the right side equation:
+                    $$f(4) = \frac{1}{1+k}[4^2 + (6k-2)(4) + 9k + 25]$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 2.</span>Expand value components inside:
+                    $$f(4) = \frac{1}{1+k}[16 + 24k - 8 + 9k + 25] = \frac{33k + 33}{1+k}$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 3.</span>Factor common factor out: \(\frac{33(k+1)}{1+k} = 33\).</div>
+                <div class="solution-step"><span class="step-label">Step 4.</span>Conclusion: Since \(f(4) = 33\), the path passes through point \(F\).</div>
+            </div>
+        </div>
+
+        <div class="prompt-panel">
+            b) The graph of \(y = g(x)\) is obtained by reflecting the graph of \(y = f(x)\) with respect to the \(y\)-axis and then translating the resulting graph upwards by 4 units. Let \(U\) be the vertex of the graph of \(y = g(x)\). Denote the origin by \(O\).
+        </div>
+
+        <div class="segment-card">
+            <div class="segment-title"><span>(i) Using the method of completing the square, express the coordinates of \(U\) in terms of \(k\).</span></div>
+            <button class="control-btn reveal-btn" id="btn-sol-19bi" onclick="revealNextStep('sol-19bi')">➡️ Show Step 1</button>
+            
+            <div class="panel-solution" id="sol-19bi" data-current-step="0">
+                <div class="solution-step"><span class="step-label">Step 1.</span>Apply functional rules: \(g(x) = f(-x) + 4\).
+                    $$g(x) = \frac{1}{1+k}[x^2 - (6k-2)x + 9k + 25] + 4$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 2.</span>+ and - balance terms internally:
+                    $$g(x) = \frac{1}{1+k}[(x - (3k-1))^2 - (3k-1)^2 + 9k + 25] + 4$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 3.</span>Expand internal constants and clean expression:
+                    $$g(x) = \frac{1}{1+k}[x - (3k-1)]^2 + \frac{-(9k^2 - 6k + 1) + 9k + 25 + 4(1+k)}{1+k}$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 4.</span>Factor fraction: \(\frac{-9k^2 + 19k + 28}{1+k} = \frac{(k+1)(28-9k)}{1+k} = 28 - 9k\).</div>
+                <div class="solution-step"><span class="step-label">Step 5.</span>By vertex form: Vertex \(U = \mathbf{(3k - 1, 28 - 9k)}\).</div>
+            </div>
+        </div>
+
+        <div class="segment-card">
+            <div class="segment-title"><span>(ii) Find \(k\) such that the area of the circle passing through \(F\), \(O\) and \(U\) is the least.</span></div>
+            <button class="control-btn reveal-btn" id="btn-sol-19bii" onclick="revealNextStep('sol-19bii')">➡️ Show Step 1</button>
+            
+            <div class="panel-solution" id="sol-19bii" data-current-step="0">
+                <div class="solution-step"><span class="step-label">Step 1.</span>Circle area is minimized when segment \(OF\) forms the direct diameter line.</div>
+                <div class="solution-step"><span class="step-label">Step 2.</span>By Thales semicircle theorem, this forces a right angle alignment: \(\angle OUF = 90^\circ\).</div>
+                <div class="solution-step"><span class="step-label">Step 3.</span>Perpendicular slope condition: \(m_{FU} \times m_{OU} = -1\).
+                    $$\left(\frac{28-9k}{3k-1}\right) \times \left(\frac{33 - (28-9k)}{4 - (3k-1)}\right) = -1$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 4.</span>Simplify to standard form quadratic: \(2k^2 - 5k - 3 = 0\).</div>
+                <div class="solution-step"><span class="step-label">Step 5.</span>Solve factorization: \((2k+1)(k-3) = 0 \implies \mathbf{k = 3}\) (reject negative root since \(k>0\)).</div>
+            </div>
+        </div>
+
+        <div class="segment-card">
+            <div class="segment-title"><span>(iii) For any positive constant \(k\), the graph of \(y = g(x)\) passes through the same point \(G\). Let \(V\) be the vertex of the graph of \(y = g(x)\) such that the area of the circle passing through \(F\), \(O\) and \(V\) is the least. Are \(F\), \(G\), \(O\) and \(V\) concyclic? Explain your answer.</span></div>
+            <button class="control-btn reveal-btn" id="btn-sol-19biii" onclick="revealNextStep('sol-19biii')">➡️ Show Step 1</button>
+            
+            <div class="panel-solution" id="sol-19biii" data-current-step="0">
+                <div class="solution-step"><span class="step-label">Step 1.</span>Find point \(G\) by transforming \(F(4,33)\): Reflect \(x \to -4\), shift \(y \to 33+4=37 \implies G(-4, 37)\).</div>
+                <div class="solution-step"><span class="step-label">Step 2.</span>Evaluate vertex \(V\) coordinates at \(k=3\): \(V = (3(3)-1, 28-9(3)) = (8, 1)\).</div>
+                <div class="solution-step"><span class="step-label">Step 3.</span>Test if \(\angle FGO = 90^\circ\) via gradient calculation: 
+                    $$m_{FG} \times m_{OG} = \left(\frac{37-33}{-4-4}\right) \times \left(\frac{37-0}{-4-0}\right) = \left(-\frac{1}{2}\right) \times \left(-\frac{37}{4}\right) = \frac{37}{8}$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 4.</span>Conclusion: Since the product \(\frac{37}{8} \neq -1\), \(\angle FGO \neq 90^\circ\). Points are <strong>not concyclic</strong>.</div>
+            </div>
+        </div>
+
+        <div class="segment-card">
+            <div class="segment-title"><span>c) Answer Checking</span></div>
+            <button class="control-btn scheme-btn" onclick="toggleMarkingScheme(this, 'img-scheme-19')">📸 Show Marking Scheme</button>
+            <img id="img-scheme-19" class="marking-scheme-img" src="2019-Q19_Sol.png" alt="2019 Q19 Marking Scheme">
+        </div>
+
+        <div class="completion-gate">
+            <input type="checkbox" id="gate-2" onclick="evaluateProgress()">
+            <label for="gate-2">Mark 2019 Q19 as Complete</label>
+        </div>
+    </div>
+
+    <div class="question-wrapper" id="block-3">
+        <h2>2024-Q19 (6 Marks)</h2>
+        <div class="prompt-panel">
+            Let \(f(x) = 2x^2 + 4mx + 8x + 2m^2 + 8m + n\), where \(m\) and \(n\) are real constants such that \(mn < 0\). Denote the vertex of the graph of \(y = f(x)\) by \(P\).
+        </div>
+
+        <div class="segment-card">
+            <div class="segment-title"><span>a) Using the method of completing the square, express, in terms of \(m\) and \(n\), the coordinates of the vertex \(P\) of the graph of \(y = f(x)\).</span> <span>[4 Marks]</span></div>
+            <button class="control-btn" onclick="toggleDisplay('hint-24a')">💡 Strategy Hint</button>
+            <button class="control-btn reveal-btn" id="btn-sol-24a" onclick="revealNextStep('sol-24a')">➡️ Show Step 1</button>
+            
+            <div class="panel-hint" id="hint-24a">Group the linear \(x\) terms as \(4(m+2)x\) and extract the leading coefficient 2 before completing the perfect square.</div>
+            
+            <div class="panel-solution" id="sol-24a" data-current-step="0">
+                <div class="solution-step"><span class="step-label">Step 1.</span>Group \(x\) terms and factor out 2:
+                    $$f(x) = 2[x^2 + 2(m + 2)x] + 2m^2 + 8m + n$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 2.</span>Add and subtract the square of half the \(x\)-coefficient inside the bracket:
+                    $$f(x) = 2[x^2 + 2(m + 2)x + (m + 2)^2 - (m + 2)^2] + 2m^2 + 8m + n$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 3.</span>Form the perfect square and expand the trailing constant part:
+                    $$f(x) = 2(x + m + 2)^2 - 2(m^2 + 4m + 4) + 2m^2 + 8m + n$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 4.</span>Simplify the expression:
+                    $$f(x) = 2(x + m + 2)^2 - 2m^2 - 8m - 8 + 2m^2 + 8m + n = 2(x + (m + 2))^2 + n - 8$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 5.</span>Determine the vertex form coordinates: Vertex \(P = \mathbf{(-m - 2, n - 8)}\).</div>
+            </div>
+        </div>
+
+        <div class="segment-card">
+            <div class="segment-title"><span>b) Describe the geometric meaning represented by transforming \(f(x)\) to \(f\left(\frac{x}{5}\right) + 7\).</span> <span>[2 Marks]</span></div>
+            <button class="control-btn reveal-btn" id="btn-sol-24b" onclick="revealNextStep('sol-24b')">➡️ Show Step 1</button>
+            
+            <div class="panel-solution" id="sol-24b" data-current-step="0">
+                <div class="solution-step"><span class="step-label">Step 1.</span>Horizontal transformation: Input fraction \(\frac{x}{5}\) means <strong>enlarge 5 times along the \(x\)-axis</strong> (horizontally).</div>
+                <div class="solution-step"><span class="step-label">Step 2.</span>Vertical transformation: Trailing scalar addition \(+7\) means <strong>shift 7 units upward</strong> (vertically).</div>
+            </div>
+        </div>
+
+        <div class="segment-card">
+            <div class="segment-title"><span>c) Answer Checking</span></div>
+            <button class="control-btn scheme-btn" onclick="toggleMarkingScheme(this, 'img-scheme-24')">📸 Show Marking Scheme</button>
+            <img id="img-scheme-24" class="marking-scheme-img" src="2024-Q19ab_Sol.png" alt="2024 Q19 Marking Scheme">
+        </div>
+
+        <div class="completion-gate">
+            <input type="checkbox" id="gate-3" onclick="evaluateProgress()">
+            <label for="gate-3">Mark 2024 Q19 as Complete</label>
+        </div>
+    </div>
+
+    <div class="question-wrapper" id="block-4">
+        <h2>2025-Q18 (9 Marks)</h2>
+        <div class="prompt-panel">
+            Let \(g(x) = 3x^2 - 6kx + 24x + 3k^2 - 24k + 55\), where \(k\) is a positive constant. Denote the vertex of the graph of \(y = g(x)\) by \(R\).
+        </div>
+
+        <div class="segment-card">
+            <div class="segment-title"><span>a) Using the method of completing the square, express the coordinates of \(R\) in terms of \(k\).</span> <span>[2 Marks]</span></div>
+            <button class="control-btn reveal-btn" id="btn-sol-25a" onclick="revealNextStep('sol-25a')">➡️ Show Step 1</button>
+            
+            <div class="panel-solution" id="sol-25a" data-current-step="0">
+                <div class="solution-step"><span class="step-label">Step 1.</span>Factorize 3 out of variable components:
+                    $$g(x) = 3[x^2 - 2(k-4)x] + 3k^2 - 24k + 55$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 2.</span>+ and - balance terms internally:
+                    $$g(x) = 3[(x - (k-4))^2 - (k-4)^2] + 3k^2 - 24k + 55$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 3.</span>Expand and simplify remaining constants:
+                    $$g(x) = 3(x - (k-4))^2 - 3(k^2 - 8k + 16) + 3k^2 - 24k + 55 = 3(x - (k-4))^2 + 7$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 4.</span>By vertex form: Coordinate \(R = \mathbf{(k - 4, 7)}\).</div>
+            </div>
+        </div>
+
+        <div class="prompt-panel">
+            b) The graph of \(y = h(x)\) is obtained by translating the graph of \(y = g(x)\) rightwards by 6 units and then downwards by 10 units. Denote the vertex of the graph of \(y = h(x)\) by \(S\). Let \(T\) be a point such that the orthocentre of \(\Delta RST\) is the origin.
+        </div>
+
+        <div class="segment-card">
+            <div class="segment-title"><span>(i) Express the coordinates of \(T\) in terms of \(k\).</span></div>
+            <button class="control-btn reveal-btn" id="btn-sol-25bi" onclick="revealNextStep('sol-25bi')">➡️ Show Step 1</button>
+            
+            <div class="panel-solution" id="sol-25bi" data-current-step="0">
+                <div class="solution-step"><span class="step-label">Step 1.</span>Find shifted vertex coordinate position \(S\):
+                    $$S = (k - 4 + 6, 7 - 10) = (k + 2, -3)$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 2.</span>Let target position be \(T(a,b)\). Since \(O\) is the orthocentre, altitude lines must satisfy perpendicular properties.</div>
+                <div class="solution-step"><span class="step-label">Step 3.</span>Apply condition \(OT \perp RS \implies m_{OT} \times m_{RS} = -1\):
+                    $$\frac{b}{a} \times \frac{-3-7}{(k+2)-(k-4)} = -1 \implies \frac{b}{a} \times \left(-\frac{10}{6}\right) = -1 \implies b = 0.6a$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 4.</span>Apply condition \(OS \perp TR \implies m_{OS} \times m_{TR} = -1\):
+                    $$\left(\frac{-3}{k+2}\right) \times \left(\frac{7-b}{k-4-a}\right) = -1 \implies 3(b-7) = (k+2)(a-k+4)$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 5.</span>Substitute linear substitution value \(b = 0.6a\) and expand equation terms to solve for parameter \(a\):
+                    $$1.8a - 21 = (k+2)a - k^2 + 2k + 8 \implies a = \frac{k^2 - 2k - 29}{k + 0.2}$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 6.</span>Result coordinate vector format: <strong>\(T\left(\frac{k^2 - 2k - 29}{k + 0.2}, \frac{0.6(k^2 - 2k - 29)}{k + 0.2}\right)\)</strong>.</div>
+            </div>
+        </div>
+
+        <div class="segment-card">
+            <div class="segment-title"><span>(ii) The coordinates of the point \(U\) are \((-5, 5)\). Let \(V\) be a point lying on \(RS\) such that \(TV\) is perpendicular to \(RS\). It is given that \(S\), \(T\), \(U\) and \(V\) are concyclic. Find \(k\).</span></div>
+            <button class="control-btn reveal-btn" id="btn-sol-25bii" onclick="revealNextStep('sol-25bii')">➡️ Show Step 1</button>
+            
+            <div class="panel-solution" id="sol-25bii" data-current-step="0">
+                <div class="solution-step"><span class="step-label">Step 1.</span>Since \(\angle TVS = 90^\circ\), concyclic points sharing segment \(TS\) mean \(\angle TUS = 90^\circ\) too.</div>
+                <div class="solution-step"><span class="step-label">Step 2.</span>Perpendicular condition: \(m_{TU} \times m_{US} = -1\):
+                    $$\left(\frac{b-5}{a+5}\right) \times \left(\frac{-3-5}{k+2+5}\right) = -1 \implies 8(b-5) = (a+5)(k+7)$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 3.</span>Substitute \(b = 0.6a\) to get alternative equation profile for variable \(a\):
+                    $$4.8a - 40 = ak + 7a + 5k + 35 \implies a = \frac{5k+75}{-k-2.2}$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 4.</span>Equate both found expressions for \(a\):
+                    $$\frac{k^2 - 2k - 29}{k + 0.2} = \frac{5k + 75}{-k - 2.2} \implies k^3 - 5.2k^2 + 42.6k - 48.8 = 0$$
+                </div>
+                <div class="solution-step"><span class="step-label">Step 5.</span>Factorize cubic form polynomial: \((k - 1)(k^2 - 4.2k + 38.4) = 0\).</div>
+                <div class="solution-step"><span class="step-label">Step 6.</span>Since quadratic part has no real roots (\(\Delta < 0\)), single root is <strong>\(k = 1\)</strong>. Claim is <strong>correct</strong>.</div>
+            </div>
+        </div>
+
+        <div class="segment-card">
+            <div class="segment-title"><span>c) Answer Checking</span></div>
+            <button class="control-btn scheme-btn" onclick="toggleMarkingScheme(this, 'img-scheme-25')">📸 Show Marking Scheme</button>
+            <img id="img-scheme-25" class="marking-scheme-img" src="2025-Q18_Sol.png" alt="2025 Q18 Marking Scheme">
+        </div>
+
+        <div class="completion-gate">
+            <input type="checkbox" id="gate-4" onclick="evaluateProgress()">
+            <label for="gate-4">Mark 2025 Q18 as Complete</label>
+        </div>
+    </div>
+</div>
+
+<script>
+    function handleTabSwitch(index) {
+        const tabs = document.querySelectorAll('.tab-trigger');
+        tabs.forEach((tab, idx) => {
+            if(idx === index) tab.classList.add('is-active');
+            else tab.classList.remove('is-active');
+        });
+
+        const blocks = document.querySelectorAll('.question-wrapper');
+        blocks.forEach((block, idx) => {
+            if(idx === index) block.classList.add('is-active');
+            else block.classList.remove('is-active');
+        });
+    }
+
+    function toggleDisplay(elementId) {
+        const item = document.getElementById(elementId);
+        item.style.display = (item.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function revealNextStep(sectionId) {
+        const wrapper = document.getElementById(sectionId);
+        const steps = wrapper.querySelectorAll('.solution-step');
+        const btn = document.getElementById('btn-' + sectionId);
+        
+        let currentStepIndex = parseInt(wrapper.getAttribute('data-current-step') || '0');
+        
+        if (currentStepIndex < steps.length) {
+            const stepToReveal = steps[currentStepIndex];
+            stepToReveal.style.display = 'block';
+            
+            if (window.MathJax && window.MathJax.typeset) {
+                window.MathJax.typeset([stepToReveal]);
+            }
+            
+            currentStepIndex++;
+            wrapper.setAttribute('data-current-step', currentStepIndex);
+            
+            if (currentStepIndex === steps.length) {
+                btn.innerText = '✔️ Solution Complete';
+                btn.style.background = '#cbd5e1';
+                btn.style.color = '#475569';
+                btn.disabled = true;
+            } else {
+                btn.innerText = '➡️ Show Step ' + (currentStepIndex + 1);
+            }
+        }
+    }
+
+    function toggleMarkingScheme(btn, imgId) {
+        const img = document.getElementById(imgId);
+        if (img.style.display === 'none' || img.style.display === '') {
+            img.style.display = 'block';
+            btn.innerText = '🙈 Hide Marking Scheme';
+        } else {
+            img.style.display = 'none';
+            btn.innerText = '📸 Show Marking Scheme';
+        }
+    }
+
+    function evaluateProgress() {
+        let score = 0;
+        for (let idx = 0; idx < 5; idx++) {
+            if (document.getElementById('gate-' + idx).checked) score++;
+        }
+        document.getElementById('tracker-status').innerText = score + " / 5 Sections Finished";
+        document.getElementById('tracker-bar').style.width = (score / 5) * 100 + "%";
+    }
+</script>
+
+</body>
+</html>
