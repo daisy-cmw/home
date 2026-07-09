@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Completing the Square Interactive Practice</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .main-layout {
+            display: flex;
+            flex-direction: column;
+            max-width: 1200px;
+            width: 100%;
+            gap: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            flex: 1;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+        }
+        .level-selector {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            background: #eee;
+            padding: 4px;
+            border-radius: 8px;
+            gap: 4px;
+        }
+        .level-btn {
+            flex: 1;
+            min-width: 60px;
+            padding: 8px 4px;
+            border: none;
+            background: transparent;
+            font-weight: bold;
+            font-size: 0.85rem;
+            color: #555;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: 0.3s;
+            text-align: center;
+        }
+        .level-btn.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .sub-problem-selector {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        .sub-btn {
+            padding: 6px 15px;
+            border: 1px solid #3498db;
+            background: #fff;
+            color: #3498db;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .sub-btn.active {
+            background: #3498db;
+            color: #fff;
+        }
+        .question-box {
+            background-color: #e8f4fd;
+            border-left: 5px solid #3498db;
+            padding: 15px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .step-row {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            line-height: 2.2rem;
+            display: flex;
+            align-items: center;
+            flex-wrap: nowrap; 
+            white-space: nowrap;
+            opacity: 0.3;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .step-row.unlocked {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .step-label {
+            font-weight: bold;
+            color: #e67e22;
+            margin-right: 10px;
+            min-width: 70px;
+            flex-shrink: 0;
+        }
+        .step-content {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap; 
+            width: 100%;
+        }
+        input[type="text"].quiz-input {
+            width: 55px;
+            padding: 4px;
+            font-size: 1rem;
+            border: 2px solid #bdc3c7;
+            border-radius: 4px;
+            text-align: center;
+            margin: 2px 4px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        input[type="text"].large-input {
+            flex-grow: 1;
+            max-width: 400px;
+            padding: 6px;
+            font-size: 1rem;
+            border: 2px solid #bdc3c7;
+            border-radius: 4px;
+            margin: 4px 0 4px 5px;
+            box-sizing: border-box;
+        }
+        input[type="text"]:disabled {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .btn-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        button.check-btn {
+            background-color: #2ecc71;
+            color: white;
+            padding: 10px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+            max-width: 200px;
+        }
+        button.check-btn:hover {
+            background-color: #27ae60;
+        }
+        #feedback {
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-top: 15px;
+            min-height: 45px;
+            padding: 0 10px;
+        }
+        .success-text { color: #2ecc71; }
+        .fail-text { color: #e74c3c; animation: shake 0.3s ease; }
+        .better-hint {
+            font-size: 0.95rem;
+            color: #e67e22;
+            font-style: italic;
+            margin-top: 4px;
+            display: block;
+        }
+        
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+        
+        #graph-container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            display: none;
+            text-align: center;
+            flex: 1;
+            max-width: 450px;
+            width: 100%;
+            box-sizing: border-box;
+            align-self: center;
+        }
+        canvas#graphCanvas {
+            border: 1px solid #ddd;
+            background-color: #fff;
+            border-radius: 8px;
+            max-width: 100%;
+            height: auto;
+        }
+        #fx-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 999;
+        }
+        .math-style {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+        }
+        .hint-text {
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            font-style: italic;
+            font-size: 0.9rem;
+            background-color: #f9f9f9;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        /* 橫螢幕 (Landscape) 以及大螢幕時，圖形自動呈現在右側 */
+        @media (min-width: 800px) and (orientation: landscape), (min-width: 950px) {
+            .main-layout {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+            #graph-container {
+                align-self: flex-start;
+                margin-top: 0;
+            }
+        }
+        @media (max-width: 480px) {
+            body { padding: 5px; }
+            .container { padding: 15px; }
+            .step-row { font-size: 0.95rem; }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="fx-canvas"></canvas>
+
+<div class="main-layout">
+    <div class="container">
+        <h1>S4 Topic: Finding the Vertex of Quadratic Functions by Using Completing the Square</h1>
+
+        <div class="level-selector">
+            <button class="level-btn active" onclick="changeLevel(1)">Level 1</button>
+            <button class="level-btn" onclick="changeLevel(2)">Level 2</button>
+            <button class="level-btn" onclick="changeLevel(3)">Level 3</button>
+            <button class="level-btn" onclick="changeLevel(4)">Level 4</button>
+            <button class="level-btn" onclick="changeLevel(5)">Level 5 (DSE)</button>
+        </div>
+
+        <div class="sub-problem-selector" id="sub-selector-container"></div>
+
+        <div class="question-box math-style" id="question-text"></div>
+        <div class="hint-text" id="hint-text"></div>
+
+        <div id="steps-container"></div>
+
+        <div class="btn-container">
+            <button class="check-btn" id="action-btn" onclick="checkCurrentStep()">Check Step</button>
+        </div>
+
+        <div id="feedback"></div>
+    </div>
+
+    <div id="graph-container">
+        <h3 style="color: #34495e; margin-bottom: 10px; font-size: 1rem;">Curve Graph</h3>
+        <canvas id="graphCanvas" width="400" height="300"></canvas>
+    </div>
+</div>
+
+<script>
+const quizData = {
+    1: [
+        {
+            expr: "y = x² + 4x - 4", hint: "a = 1, b is a positive even number.",
+            steps: [
+                { label: "Step 1", html: "a = 1, no need to factorize out anything.", ans: [] },
+                { label: "Step 2", html: "y = x² + 4x + <input type='text' class='quiz-input' data-ans='(4/2)2,(4/2)^2,(2)2,(2)^2,4' data-better='(2)², (2)^2, (4/2)²'> - <input type='text' class='quiz-input' data-ans='(4/2)2,(4/2)^2,(2)2,(2)^2,4' data-better='(2)², (2)^2, (4/2)²'> - 4", ans: ["4"] },
+                { label: "Step 3", html: "y = (x + <input type='text' class='quiz-input' data-ans='2'>)² - <input type='text' class='quiz-input' data-ans='4'> - 4", ans: ["2","4"] },
+                { label: "Step 4", html: "y = (x + 2)² - <input type='text' class='quiz-input' data-ans='8'>", ans: ["8"] },
+                { label: "Step 5", html: "Therefore the vertex is ( <input type='text' class='quiz-input' data-ans='-2'> , <input type='text' class='quiz-input' data-ans='-8'> )", ans: ["-2","-8"] }
+            ], plot: (x) => Math.pow(x + 2, 2) - 8, vx: -2, vy: -8
+        },
+        {
+            expr: "y = x² - 6x + 2", hint: "a = 1, b is a negative even number.",
+            steps: [
+                { label: "Step 1", html: "a = 1, no need to factorize out anything.", ans: [] },
+                { label: "Step 2", html: "y = x² - <input type='text' class='quiz-input' data-ans='6'>x + <input type='text' class='quiz-input' data-ans='(6/2)2,(6/2)^2,(3)2,(3)^2,9' data-better='(3)², (3)^2, (6/2)²'> - <input type='text' class='quiz-input' data-ans='(6/2)2,(6/2)^2,(3)2,(3)^2,9' data-better='(3)², (3)^2, (6/2)²'> + 2", ans: ["6","9"] },
+                { label: "Step 3", html: "y = (x - <input type='text' class='quiz-input' data-ans='3'>)² - <input type='text' class='quiz-input' data-ans='9,(3)2,(3)^2'> + <input type='text' class='quiz-input' data-ans='2'>", ans: ["3","9","2"] },
+                { label: "Step 4", html: "y = (x - 3)² - <input type='text' class='quiz-input' data-ans='7'>", ans: ["7"] },
+                { label: "Step 5", html: "Therefore the vertex is ( <input type='text' class='quiz-input' data-ans='3'> , <input type='text' class='quiz-input' data-ans='-7'> )", ans: ["3","-7"] }
+            ], plot: (x) => Math.pow(x - 3, 2) - 7, vx: 3, vy: -7
+        },
+        {
+            expr: "y = x² + 8x + 5", hint: "Try the whole question. Use ^ for square.",
+            steps: [
+                { label: "Step 2", html: "y = <input type='text' class='large-input' data-ans='x2+8x+16-16+5,x2+8x+(4)2-(4)2+5,x2+8x+(4)^2-(4)^2+5,x^2+8x+16-16+5,x^2+8x+(4)2-(4)2+5,x^2+8x+(4)^2-(4)^2+5'>", ans: [] },
+                { label: "Step 3", html: "y = <input type='text' class='large-input' data-ans='(x+4)2-16+5,(x+4)^2-16+5,(x+4)2-11,(x+4)^2-11' data-shortcut='(x+4)2-11,(x+4)^2-11'>", ans: [] },
+                { label: "Step 4", html: "y = <input type='text' class='large-input' data-ans='(x+4)2-11,(x+4)^2-11'>", ans: [] },
+                { label: "Step 5", html: "Therefore the vertex is ( <input type='text' class='quiz-input' data-ans='-4'> , <input type='text' class='quiz-input' data-ans='-11'> )", ans: ["-4","-11"] }
+            ], plot: (x) => Math.pow(x + 4, 2) - 11, vx: -4, vy: -11
+        }
+    ],
+    2: [
+        {
+            expr: "y = x² - 7x", hint: "b is an odd number. Fractions and Decimals allowed (e.g. 5/2 = 2.5).",
+            steps: [
+                { label: "Step 2", html: "y = x² - 7x + <input type='text' class='quiz-input' data-ans='12.25,49/4,(7/2)2,(7/2)^2,3.52,3.5^2' data-better='(7/2)², 3.5²'> - <input type='text' class='quiz-input' data-ans='12.25,49/4,(7/2)2,(7/2)^2,3.52,3.5^2' data-better='(7/2)², 3.5²'>", ans: ["12.25"] },
+                { label: "Step 3", html: "y = (x - <input type='text' class='quiz-input' data-ans='3.5,7/2'>)² - <input type='text' class='quiz-input' data-ans='12.25,49/4,(7/2)2,(7/2)^2'>", ans: ["3.5","12.25"] },
+                { label: "Step 4", html: "Therefore the vertex is ( <input type='text' class='quiz-input' data-ans='3.5,7/2'> , <input type='text' class='quiz-input' data-ans='-12.25,-49/4'> )", ans: ["3.5","-12.25"] }
+            ], plot: (x) => Math.pow(x - 3.5, 2) - 12.25, vx: 3.5, vy: -12.25
+        },
+        {
+            expr: "y = x² + 3x + 1", hint: "b is an odd number. Fractions and Decimals allowed (e.g. 5/2 = 2.5).",
+            steps: [
+                { label: "Step 2", html: "y = x² + <input type='text' class='quiz-input' data-ans='3'>x + <input type='text' class='quiz-input' data-ans='2.25,9/4,(1.5)2,(1.5)^2,(3/2)2,(3/2)^2' data-better='(1.5)², (3/2)²'> - <input type='text' class='quiz-input' data-ans='2.25,9/4,(1.5)2,(1.5)^2,(3/2)2,(3/2)^2' data-better='(1.5)², (3/2)²'> + 1", ans: ["3","2.25"] },
+                { label: "Step 3", html: "y = (x + <input type='text' class='quiz-input' data-ans='1.5,3/2'>)² - <input type='text' class='quiz-input' data-ans='1.25,5/4'>", ans: ["1.5","1.25"] },
+                { label: "Step 4", html: "Therefore the vertex is ( <input type='text' class='quiz-input' data-ans='-1.5,-3/2'> , <input type='text' class='quiz-input' data-ans='-1.25,-5/4'> )", ans: ["-1.5","-1.25"] }
+            ], plot: (x) => Math.pow(x + 1.5, 2) - 1.25, vx: -1.5, vy: -1.25
+        },
+        {
+            /* Q3 增加 Constant 項提高難度 */
+            expr: "y = x² - 5x + 3", hint: "Try the whole question. Use ^ for square.",
+            steps: [
+                { label: "Step 2", html: "y = <input type='text' class='large-input' data-ans='x2-5x+6.25-6.25+3,x^2-5x+6.25-6.25+3,x2-5x+25/4-25/4+3,x^2-5x+25/4-25/4+3'>", ans: [] },
+                { label: "Step 3", html: "y = <input type='text' class='large-input' data-ans='(x-2.5)2-6.25+3,(x-2.5)^2-6.25+3,(x-2.5)2-3.25,(x-2.5)^2-3.25,(x-5/2)2-13/4,(x-5/2)^2-13/4'>", ans: [] },
+                { label: "Step 4", html: "Therefore the vertex is ( <input type='text' class='quiz-input' data-ans='2.5,5/2'> , <input type='text' class='quiz-input' data-ans='-3.25,-13/4'> )", ans: ["2.5","-3.25"] }
+            ], plot: (x) => Math.pow(x - 2.5, 2) - 3.25, vx: 2.5, vy: -3.25
+        }
+    ],
+    3: [
+        {
+            expr: "y = 3x² - 12x", hint: "Factorize if a≠1",
+            steps: [
+                { label: "Step 1", html: "y = <input type='text' class='quiz-input' data-ans='3'> ( x² - <input type='text' class='quiz-input' data-ans='4'>x )", ans: ["3","4"] },
+                { label: "Step 2", html: "y = <input type='text' class='quiz-input' data-ans='3'> [ x² - 4x + <input type='text' class='quiz-input' data-ans='(4/2)2,(4/2)^2,(2)2,(2)^2,4' data-better='(2)², (2)^2'> - <input type='text' class='quiz-input' data-ans='(4/2)2,(4/2)^2,(2)2,(2)^2,4' data-better='(2)², (2)^2'> ]", ans: ["3","4"] },
+                { label: "Step 3", html: "y = <input type='text' class='quiz-input' data-ans='3'> [ (x - <input type='text' class='quiz-input' data-ans='2'> )² - <input type='text' class='quiz-input' data-ans='4'> ]", ans: ["3","2","4"] },
+                { label: "Step 4", html: "y = 3(x - 2)² - <input type='text' class='quiz-input' data-ans='12'>", ans: ["12"] },
+                { label: "Step 5", html: "Therefore the vertex is ( <input type='text' class='quiz-input' data-ans='2'> , <input type='text' class='quiz-input' data-ans='-12'> )", ans: ["2","-12"] }
+            ], plot: (x) => 3*Math.pow(x - 2, 2) - 12, vx: 2, vy: -12
+        },
+        {
+            /* Q2 改為負數 a */
+            expr: "y = -2x² + 8x + 3", hint: "Factorize if a≠1",
+            steps: [
+                { label: "Step 1", html: "y = <input type='text' class='quiz-input' data-ans='-2'> ( x² - <input type='text' class='quiz-input' data-ans='4'>x ) + 3", ans: ["-2","4"] },
+                { label: "Step 2", html: "y = <input type='text' class='quiz-input' data-ans='-2'> [ x² - 4x + <input type='text' class='quiz-input' data-ans='(4/2)2,(4/2)^2,(2)2,(2)^2,4' data-better='(2)², (2)^2'> - <input type='text' class='quiz-input' data-ans='(4/2)2,(4/2)^2,(2)2,(2)^2,4' data-better='(2)², (2)^2'> ] + <input type='text' class='quiz-input' data-ans='3'>", ans: ["-2","4","3"] },
+                { label: "Step 3", html: "y = <input type='text' class='quiz-input' data-ans='-2'> [ (x - <input type='text' class='quiz-input' data-ans='2'> )² - <input type='text' class='quiz-input' data-ans='4'> ] + <input type='text' class='quiz-input' data-ans='3'>", ans: ["-2","2","4","3"] },
+                { label: "Step 4", html: "y = -2(x - 2)² + <input type='text' class='quiz-input' data-ans='11'>", ans: ["11"] },
+                { label: "Step 5", html: "Therefore the vertex is ( <input type='text' class='quiz-input' data-ans='2'> , <input type='text' class='quiz-input' data-ans='11'> )", ans: ["2","11"] }
+            ], plot: (x) => -2*Math.pow(x - 2, 2) + 11, vx: 2, vy: 11
+        },
+        {
+            /* Q3 改為負數 a */
+            expr: "y = -4x² - 16x - 7", hint: "Factorize if a≠1. Use ^ for square.",
+            steps: [
+                { label: "Step 1", html: "y = <input type='text' class='large-input' data-ans='-4(x2+4x)-7,-4(x^2+4x)-7'>", ans: [] },
+                { label: "Step 2", html: "y = <input type='text' class='large-input' data-ans='-4[x2+4x+4-4]-7,-4[x^2+4x+4-4]-7,-4(x2+4x+4-4)-7,-4(x^2+4x+4-4)-7'>", ans: [] },
+                { label: "Step 4", html: "y = <input type='text' class='large-input' data-ans='-4(x+2)2+9,-4(x+2)^2+9'>", ans: [] },
+                { label: "Step 5", html: "Therefore the vertex is ( <input type='text' class='quiz-input' data-ans='-2'> , <input type='text' class='quiz-input' data-ans='9'> )", ans: ["-2","9"] }
+            ], plot: (x) => -4*Math.pow(x + 2, 2) + 9, vx: -2, vy: 9
+        }
+    ],
+    4: [
+        {
+            expr: "y = 2x² - 10x", hint: "Factorize if a≠1. Use ^ for square. Fractions and Decimals allowed (e.g. 5/2 = 2.5).",
+            steps: [
+                { label: "Step 1", html: "y = <input type='text' class='large-input' data-ans='2(x2-5x),2(x^2-5x)'>", ans: [] },
+                { label: "Step 2", html: "y = <input type='text' class='large-input' data-ans='2[x2-5x+6.25-6.25],2[x^2-5x+6.25-6.25],2[x2-5x+25/4-25/4],2[x^2-5x+25/4-25/4]'>", ans: [] },
+                { label: "Step 4", html: "y = <input type='text' class='large-input' data-ans='2(x-2.5)2-12.5,2(x-2.5)^2-12.5,2(x-5/2)2-25/2,2(x-5/2)^2-25/2'>", ans: [] },
+                { label: "Step 5", html: "Therefore the vertex is ( <input type='text' class='quiz-input' data-ans='2.5,5/2'> , <input type='text' class='quiz-input' data-ans='-12.5,-25/2'> )", ans: ["2.5","-12.5"] }
+            ], plot: (x) => 2*Math.pow(x - 2.5, 2) - 12.5, vx: 2.5, vy: -12.5
+        },
+        {
+            expr: "y = 4x² + 4x - 1", hint: "Factorize if a≠1. Use ^ for square. Fractions and Decimals allowed (e.g. 5/2 = 2.5).",
+            steps: [
+                { label: "Step 1", html: "y = <input type='text' class='quiz-input' data-ans='4'> ( x² + <input type='text' class='quiz-input' data-ans='1'>x ) - 1", ans: ["4","1"] },
+                { label: "Step 2", html: "y = 4 [ x² + 1x + <input type='text' class='quiz-input' data-ans='0.25,1/4,(0.5)2,(0.5)^2,(1/2)2,(1/2)^2' data-better='(0.5)², (1/2)²'> - <input type='text' class='quiz-input' data-ans='0.25,1/4,(0.5)2,(0.5)^2,(1/2)2,(1/2)^2' data-better='(0.5)², (1/2)²'> ] - 1", ans: ["0.25"] },
+                { label: "Step 3", html: "y = 4 [ (x + <input type='text' class='quiz-input' data-ans='0.5,1/2'> )² - <input type='text' class='quiz-input' data-ans='0.25,1/4,(0.5)2,(0.5)^2,(1/2)2,(1/2)^2'> ] - 1", ans: ["0.5"] },
+                { label: "Step 4", html: "y = 4(x + <input type='text' class='quiz-input' data-ans='0.5,1/2'> )² - <input type='text' class='quiz-input' data-ans='2'>", ans: ["2"] },
+                { label: "Step 5", html: "Therefore the vertex is ( <input type='text' class='quiz-input' data-ans='-0.5,-1/2'> , <input type='text' class='quiz-input' data-ans='-2'> )", ans: ["-0.5","-2"] }
+            ], plot: (x) => 4*Math.pow(x + 0.5, 2) - 2, vx: -0.5, vy: -2
+        },
+        {
+            /* Q3 改為負數 a */
+            expr: "y = -2x² - 6x + 5", hint: "Factorize if a≠1. Use ^ for square. Fractions and Decimals allowed (e.g. 5/2 = 2.5).",
+            steps: [
+                { label: "Step 1", html: "y = <input type='text' class='quiz-input' data-ans='-2'> ( x² + <input type='text' class='quiz-input' data-ans='3'>x ) + 5", ans: ["-2","3"] },
+                { label: "Step 2", html: "y = -2 [ x² + 3x + <input type='text' class='quiz-input' data-ans='2.25,9/4,(1.5)2,(1.5)^2,(3/2)2,(3/2)^2' data-better='(1.5)², (3/2)²'> - <input type='text' class='quiz-input' data-ans='2.25,9/4,(1.5)2,(1.5)^2,(3/2)2,(3/2)^2' data-better='(1.5)², (3/2)²'> ] + 5", ans: ["2.25"] },
+                { label: "Step 3", html: "y = -2 [ (x + <input type='text' class='quiz-input' data-ans='1.5,3/2'> )² - 2.25 ] + 5", ans: ["1.5"] },
+                { label: "Step 4", html: "y = -2(x + 1.5)² + <input type='text' class='quiz-input' data-ans='9.5,19/2'>", ans: ["9.5"] },
+                { label: "Step 5", html: "Therefore the vertex is ( <input type='text' class='quiz-input' data-ans='-1.5,-3/2'> , <input type='text' class='quiz-input' data-ans='9.5,19/2'> )", ans: ["-1.5","9.5"] }
+            ], plot: (x) => -2*Math.pow(x + 1.5, 2) + 9.5, vx: -1.5, vy: 9.5
+        }
+    ],
+    5: [
+        {
+            expr: "DSE 2013 Q17: f(x) = 36x - x²", hint: "DSE Challenge: Multi-blanks format.",
+            steps: [
+                { label: "Step 1", html: "f(x) = <input type='text' class='quiz-input' data-ans='-1,-'> ( x² - <input type='text' class='quiz-input' data-ans='36'>x )", ans: ["-1","36"] },
+                { label: "Step 2", html: "f(x) = -1 [ x² - <input type='text' class='quiz-input' data-ans='36'>x + <input type='text' class='quiz-input' data-ans='324,(18)2,(18)^2' data-better='(18)²'> - <input type='text' class='quiz-input' data-ans='324,(18)2,(18)^2'> ]", ans: ["324"] },
+                { label: "Step 3", html: "f(x) = -1 [ (x - <input type='text' class='quiz-input' data-ans='18'> )² - <input type='text' class='quiz-input' data-ans='324'> ]", ans: ["18"] },
+                { label: "Step 4", html: "Therefore the vertex is ( <input type='text' class='quiz-input' data-ans='18'> , <input type='text' class='quiz-input' data-ans='324'> )", ans: ["18","324"] }
+            ], plot: (x) => -Math.pow(x - 18, 2) + 324, vx: 18, vy: 324
+        },
+        {
+            expr: "DSE 2015 Q18: f(x) = 2x² - 4kx + 3k² + 5", hint: "DSE Challenge: Multi-blanks format.",
+            steps: [
+                { label: "Step 1", html: "f(x) = <input type='text' class='quiz-input' data-ans='2'> ( x² - <input type='text' class='quiz-input' data-ans='2'>kx ) + 3k² + 5", ans: ["2","2"] },
+                { label: "Step 2", html: "f(x) = 2 [ x² - <input type='text' class='quiz-input' data-ans='2'>kx + <input type='text' class='quiz-input' data-ans='k2,k^2,(k)2,(k)^2' data-better='k²'> - <input type='text' class='quiz-input' data-ans='k2,k^2'> ] + 3k² + 5", ans: ["k2"] },
+                { label: "Step 3", html: "f(x) = 2 [ (x - <input type='text' class='quiz-input' data-ans='k'> )² - <input type='text' class='quiz-input' data-ans='k2,k^2'> ] + 3k² + 5", ans: ["k"] },
+                { label: "Step 4", html: "Therefore the vertex is ( <input type='text' class='quiz-input' data-ans='k'> , <input type='text' class='large-input' data-ans='k2+5,k^2+5'> )", ans: ["k","k2+5"] }
+            ], plot: (x) => 2*Math.pow(x - 2, 2) + 9, vx: 2, vy: 9
+        },
+        {
+            expr: "DSE 2016 Q18a: f(x) = (-1/3)x² + 12x - 121", hint: "DSE Challenge: Multi-blanks format.",
+            steps: [
+                { label: "Step 1", html: "f(x) = (-1/3) ( x² - <input type='text' class='quiz-input' data-ans='36'>x ) - 121", ans: ["36"] },
+                { label: "Step 2", html: "f(x) = (-1/3) [ x² - <input type='text' class='quiz-input' data-ans='36'>x + <input type='text' class='quiz-input' data-ans='324,(18)2,(18)^2' data-better='(18)²'> - <input type='text' class='quiz-input' data-ans='324,(18)2,(18)^2'> ] - 121", ans: ["324"] },
+                { label: "Step 3", html: "f(x) = (-1/3) [ (x - <input type='text' class='quiz-input' data-ans='18'> )² - <input type='text' class='quiz-input' data-ans='324'> ] - 121", ans: ["18"] },
+                { label: "Step 4", html: "Therefore the vertex is ( <input type='text' class='quiz-input' data-ans='18'> , <input type='text' class='quiz-input' data-ans='-13'> )", ans: ["18","-13"] }
+            ], plot: (x) => (-1/3)*Math.pow(x-18,2) - 13, vx: 18, vy: -13
+        }
+    ]
+};
+
+let currentLevel = 1;
+let currentSubIndex = 0;
+let currentStepIndex = 0;
+
+function initQuiz() {
+    renderSubSelectors();
+    loadProblem();
+}
+
+function changeLevel(lvl) {
+    currentLevel = lvl;
+    currentSubIndex = 0;
+    const buttons = document.querySelectorAll('.level-btn');
+    buttons.forEach((btn, idx) => {
+        if (idx === lvl - 1) btn.classList.add('active');
+        else btn.classList.remove('active');
+    });
+    renderSubSelectors();
+    loadProblem();
+}
+
+function renderSubSelectors() {
+    const container = document.getElementById('sub-selector-container');
+    container.innerHTML = "";
+    const totalProblems = quizData[currentLevel].length;
+    for (let i = 0; i < totalProblems; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'sub-btn' + (i === currentSubIndex ? ' active' : '');
+        btn.innerText = "Q" + (i + 1);
+        btn.onclick = () => {
+            currentSubIndex = i;
+            const subBtns = container.querySelectorAll('.sub-btn');
+            subBtns.forEach((b, idx) => {
+                if (idx === i) b.classList.add('active');
+                else b.classList.remove('active');
+            });
+            loadProblem();
+        };
+        container.appendChild(btn);
+    }
+}
+
+function loadProblem() {
+    const p = quizData[currentLevel][currentSubIndex];
+    document.getElementById('question-text').innerHTML = p.expr;
+    document.getElementById('hint-text').innerHTML = p.hint || "";
+    document.getElementById('feedback').innerHTML = "";
+    document.getElementById('graph-container').style.display = "none";
+    
+    currentStepIndex = 0;
+    const container = document.getElementById('steps-container');
+    container.innerHTML = "";
+    
+    p.steps.forEach((step, idx) => {
+        const row = document.createElement('div');
+        row.id = `step-row-${idx}`;
+        row.className = 'step-row math-style' + (idx === 0 ? ' unlocked' : '');
+        
+        const label = document.createElement('span');
+        label.className = 'step-label';
+        label.innerText = step.label + ": ";
+        
+        const body = document.createElement('span');
+        body.className = 'step-content';
+        body.innerHTML = step.html;
+        
+        row.appendChild(label);
+        row.appendChild(body);
+        container.appendChild(row);
+    });
+
+    const actionBtn = document.getElementById('action-btn');
+    actionBtn.innerText = "Check Step";
+    actionBtn.onclick = checkCurrentStep;
+    actionBtn.style.backgroundColor = "#2ecc71";
+}
+
+function cleanInput(str) {
+    return str.trim().toLowerCase()
+              .replace(/\s+/g, '')
+              .replace(/\^2/g, '2')
+              .replace(/²/g, '2');
+}
+
+function checkCurrentStep() {
+    const p = quizData[currentLevel][currentSubIndex];
+    const currentRow = document.getElementById(`step-row-${currentStepIndex}`);
+    const inputs = currentRow.querySelectorAll('input[type="text"]');
+    
+    let stepCorrect = true;
+    let showBetterHint = false;
+    let betterFormat = "";
+    let isShortcut = false;
+
+    inputs.forEach(input => {
+        let val = cleanInput(input.value);
+        let expectedRaw = input.getAttribute('data-ans').toLowerCase();
+        let possibleAns = expectedRaw.split(',').map(a => cleanInput(a));
+        let shortcutRaw = input.getAttribute('data-shortcut');
+        
+        if (shortcutRaw) {
+            let shortcuts = shortcutRaw.split(',').map(s => cleanInput(s));
+            if (shortcuts.includes(val)) {
+                isShortcut = true;
+            }
+        }
+
+        if (possibleAns.includes(val) || (expectedRaw === "" && val === "")) {
+            input.style.borderColor = "#2ecc71";
+            input.style.backgroundColor = "#e8f8f0";
+            input.disabled = true;
+
+            let betterAttr = input.getAttribute('data-better');
+            let isRawValue = (val === '9' || val === '4' || val === '12.25' || val === '2.25' || val === '0.25' || val === '1/4' || val === '9/4' || val === '49/4');
+            if (betterAttr && isRawValue) {
+                showBetterHint = true;
+                betterFormat = betterAttr;
+            }
+        } else {
+            stepCorrect = false;
+            input.style.borderColor = "#e74c3c";
+            input.style.backgroundColor = "#fdedec";
+        }
+    });
+
+    const fb = document.getElementById('feedback');
+    if (stepCorrect) {
+        let hintHtml = showBetterHint ? `<span class='better-hint'>💡 Hint: Writing ${betterFormat} is much better for completing the square!</span>` : "";
+        fb.innerHTML = `<span class='success-text' style='font-size:1.1rem; color:#2ecc71;'>✓ Step passed!</span>${hintHtml}`;
+        
+        if (isShortcut) {
+            for (let i = currentStepIndex + 1; i < p.steps.length - 1; i++) {
+                const skippedRow = document.getElementById(`step-row-${i}`);
+                if (skippedRow) {
+                    skippedRow.classList.add('unlocked');
+                    const skippedInputs = skippedRow.querySelectorAll('input[type="text"]');
+                    skippedInputs.forEach(si => {
+                        si.disabled = true;
+                        si.placeholder = "Skipped";
+                        si.style.backgroundColor = "#f0f0f0";
+                    });
+                }
+            }
+            currentStepIndex = p.steps.length - 1; 
+            const finalRow = document.getElementById(`step-row-${currentStepIndex}`);
+            finalRow.classList.add('unlocked');
+            return;
+        }
+
+        if (currentStepIndex < p.steps.length - 1) {
+            currentStepIndex++;
+            const nextRow = document.getElementById(`step-row-${currentStepIndex}`);
+            nextRow.classList.add('unlocked');
+            
+            const nextInputs = nextRow.querySelectorAll('input[type="text"]');
+            if (nextInputs.length === 0 && currentStepIndex < p.steps.length - 1) {
+                currentStepIndex++;
+                const furtherRow = document.getElementById(`step-row-${currentStepIndex}`);
+                furtherRow.classList.add('unlocked');
+            }
+        } else {
+            fb.innerHTML = "<span class='success-text'>🎉 Brilliant! Perfectly Correct! 🎆</span>";
+            document.getElementById('graph-container').style.display = "block";
+            drawCurve(p);
+            triggerFireworks();
+        }
+    } else {
+        fb.innerHTML = "<span class='fail-text' style='font-size:1.1rem; color:#e74c3c;'>😢 Incorrect inputs in this step. Try again!</span>";
+    }
+}
+
+function drawCurve(q) {
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    const w = canvas.width, h = canvas.height;
+    let scale = currentLevel === 5 ? 5 : 15; 
+    let centerX = w / 2 - q.vx * scale;
+    let centerY = h / 2 + q.vy * scale;
+    
+    if(centerY < 40) centerY = 50;
+    if(centerY > h - 40) centerY = h - 50;
+    if(centerX < 40) centerX = 50;
+    if(centerX > w - 40) centerX = w - 50;
+
+    // 繪製座標軸 (補齊 ctx.)
+    ctx.strokeStyle = '#bdc3c7';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, centerY); ctx.lineTo(w, centerY); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(centerX, 0); ctx.lineTo(centerX, h); ctx.stroke();
+    
+    // 繪製二次函數曲線 (補齊 ctx.)
+    ctx.strokeStyle = '#e74c3c';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    let first = true;
+    for (let px = 0; px < w; px++) {
+        let x = (px - centerX) / scale;
+        let y = q.plot(x);
+        let py = centerY - y * scale;
+        if (py >= 0 && py <= h) {
+            if (first) { ctx.moveTo(px, py); first = false; }
+            else { ctx.lineTo(px, py); }
+        }
+    }
+    ctx.stroke();
+    
+    // 繪製頂點圓點
+    ctx.fillStyle = '#3498db';
+    let vpx = centerX + q.vx * scale;
+    let vpy = centerY - q.vy * scale;
+    ctx.beginPath(); ctx.arc(vpx, vpy, 6, 0, 2 * Math.PI); ctx.fill();
+    
+    // 繪製頂點文字標籤
+    ctx.fillStyle = '#2c3e50';
+    ctx.font = 'bold 12px Arial';
+    if (isNaN(q.vx)) {
+        ctx.fillText(`Vertex (Parametric Form Displayed)`, vpx - 40, vpy - 10);
+    } else {
+        ctx.fillText(`Vertex (${q.vx}, ${q.vy})`, vpx + 10, vpy - 10);
+    }
+}
+
+const fxCanvas = document.getElementById('fx-canvas');
+const fxCtx = fxCanvas.getContext('2d');
+let particles = [];
+
+function resizeFxCanvas() {
+    fxCanvas.width = window.innerWidth;
+    fxCanvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeFxCanvas);
+resizeFxCanvas();
+
+function triggerFireworks() {
+    particles = [];
+    for (let i = 0; i < 60; i++) {
+        particles.push({
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 3,
+            vx: (Math.random() - 0.5) * 8,
+            vy: (Math.random() - 0.5) * 8 - 3,
+            alpha: 1,
+            color: "hsl(" + (Math.random() * 360) + ", 100%, 50%)"
+        });
+    }
+    animateFireworks();
+}
+
+function animateFireworks() {
+    if (particles.length === 0) return;
+    fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
+    for (let i = particles.length - 1; i >= 0; i--) {
+        let p = particles[i];
+        p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.alpha -= 0.02;
+        if (p.alpha <= 0) { particles.splice(i, 1); continue; }
+        fxCtx.globalAlpha = p.alpha;
+        fxCtx.fillStyle = p.color;
+        fxCtx.beginPath(); fxCtx.arc(p.x, p.y, 4, 0, 2 * Math.PI); fxCtx.fill();
+    }
+    requestAnimationFrame(animateFireworks);
+}
+
+initQuiz();
+</script>
+
+</body>
+</html>
