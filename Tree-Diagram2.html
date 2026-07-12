@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>機率樹狀圖產生器 Pro v4.0</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; background-color: #f0f2f5; }
+    .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    h2 { color: #1e293b; margin-top: 0; }
+    .input-group { margin-bottom: 15px; }
+    label { display: block; font-weight: bold; margin-bottom: 8px; color: #334155; }
+    input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+    .radio-group { display: flex; gap: 20px; margin-top: 5px; }
+    .radio-label { display: flex; align-items: center; gap: 6px; font-weight: normal; cursor: pointer; }
+    .radio-label input { width: auto; }
+    .btn-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+    button { flex: 1; min-width: 180px; padding: 14px; font-size: 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    .btn-main { background-color: #0284c7; color: white; }
+    .btn-main:hover { background-color: #0369a1; }
+    .btn-toggle { background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+    .btn-toggle:hover { background-color: #e2e8f0; }
+    
+    /* 樹狀圖與外包裝 */
+    #tree-output-container { background: white; padding: 35px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow-x: auto; }
+    
+    /* 讓繪圖區能自由延展 */
+    .mermaid-wrapper { min-width: 800px; display: flex; justify-content: flex-start; margin-bottom: 10px; padding-left: 20px; }
+    .mermaid { width: 100%; text-align: left; }
+    
+    .info { margin-top: 20px; line-height: 1.6; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+    .badge { background: #0284c7; color: white; padding: 3px 12px; border-radius: 20px; font-size: 0.9em; font-weight: bold; }
+
+    /* 客製化 Mermaid 子圖表虛線框 */
+    .mermaid .subgraphCluster {
+      fill: #f8fafc !important;
+      stroke: #cbd5e1 !important;
+      stroke-width: 1px !important;
+      stroke-dasharray: 4 !important;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>🌳 機率樹狀圖產生器 (Probability Tree Generator)</h2>
+    
+    <div class="input-group">
+      <label for="options">選項 (Options) [用半形逗號隔開 ,]:</label>
+      <input type="text" id="options" value="Green, Red, Red" placeholder="例如: Green, Blue, Red">
+    </div>
+    
+    <div class="input-group">
+      <label>抽樣模式 (Sampling Mode):</label>
+      <div class="radio-group">
+        <label class="radio-label">
+          <input type="radio" name="replacement" value="with" checked onclick="generateTree()"> 
+          有放回 (With Replacement)
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="replacement" value="without" onclick="generateTree()"> 
+          不放回 (Without Replacement)
+        </label>
+      </div>
+    </div>
+    
+    <div class="input-group">
+      <label for="depth">層數 (Number of Layers / Draws):</label>
+      <select id="depth" onchange="generateTree()">
+        <option value="1">1 次 (1 Draw)</option>
+        <option value="2" selected>2 次 (2 Draws)</option>
+        <option value="3">3 次 (3 Draws)</option>
+        <option value="4">4 次 (4 Draws)</option>
+      </select>
+    </div>
+    
+    <div class="btn-container">
+      <button class="btn-main" onclick="generateTree()">產生樹狀圖 (Generate)</button>
+      <button class="btn-toggle" onclick="toggleProbabilities()">顯示/隱藏機率 (Hide Probabilities)</button>
+      <button id="btn-toggle-counts" class="btn-toggle" onclick="toggleCounts()">顯示/隱藏剩餘數量 (Hide Remaining Counts)</button>
+    </div>
+
+    <div id="result-info" class="info"></div>
+  </div>
+
+  <div id="tree-output-container">
+    <div class="mermaid-wrapper" id="mermaid-holder"></div>
+  </div>
+
+  <script>
+    mermaid.initialize({ 
+      startOnLoad: false, 
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: {
+        nodeSpacing: 40, 
+        rankSpacing: 140  
+      }
+    });
+
+    let isProbVisible = true;  
+    let isCountVisible = true; 
+
+    // 最大公因數（用來簡化分數，例如 2/2 變成 1，2/4 變成 1/2）
+    function gcd(a, b) {
+      return b ? gcd(b, a % b) : a;
+    }
+
+    function formatFraction(num, denom) {
+      if (num === denom) return "1";
+      if (num === 0) return "0";
+      const d = gcd(num, denom);
+      return `${num / d}/${denom / d}`;
+    }
+
+    function toggleProbabilities() {
+      isProbVisible = !isProbVisible;
+      generateTree();
+    }
+
+    function toggleCounts() {
+      // 只有在沒有重複物件時才允許切換
+      const optionsInput = document.getElementById('options').value;
+      const rawOptions = optionsInput.split(',').map(item => item.trim()).filter(item => item !== '');
+      const hasDuplicates = rawOptions.length !== new Set(rawOptions).size;
+      
+      if (!hasDuplicates) {
+        isCountVisible = !isCountVisible;
+        generateTree();
+      }
+    }
+
+    function generateTree() {
+      const optionsInput = document.getElementById('options').value;
+      const depth = parseInt(document.getElementById('depth').value);
+      const mode = document.querySelector('input[name="replacement"]:checked').value;
+      
+      const rawOptions = optionsInput.split(',').map(item => item.trim()).filter(item => item !== '');
+      
+      if (rawOptions.length === 0) {
+        alert('請輸入選項！');
+        return;
+      }
+
+      // 檢查是否有重複物件
+      const hasDuplicates = rawOptions.length !== new Set(rawOptions).size;
+      const toggleCountsBtn = document.getElementById('btn-toggle-counts');
+
+      if (hasDuplicates) {
+        // 有重複物件：隱藏按鈕、鎖定狀態不顯示虛線框
+        toggleCountsBtn.style.display = 'none';
+        isCountVisible = false;
+      } else {
+        // 沒有重複物件：恢復顯示按鈕
+        toggleCountsBtn.style.display = 'inline-block';
+      }
+
+      // 建立初始的頻率字典 (Frequency Map)
+      // 例如 Green, Red, Red 會變成 { "Green": 1, "Red": 2 }
+      const initialMap = {};
+      rawOptions.forEach(opt => {
+        initialMap[opt] = (initialMap[opt] || 0) + 1;
+      });
+
+      let mermaidSyntax = "graph LR\n"; 
+      let currentId = 0;
+      let totalOutcomes = [];
+      
+      let layersNodeMap = {};
+      for(let d = 0; d <= depth; d++) {
+        layersNodeMap[d] = [];
+      }
+
+      // 遞迴建立樹狀圖分支
+      function buildBranch(parentId, currentDepth, currentPath, currentMap) {
+        // 計算目前剩餘的總球數（分母）
+        let totalItems = 0;
+        for (let key in currentMap) {
+          totalItems += currentMap[key];
+        }
+
+        // 達最大層數，或袋子裡已經沒東西了
+        if (currentDepth > depth || totalItems === 0) {
+          totalOutcomes.push(currentPath.trim());
+          return;
+        }
+
+        // 遍歷所有「不重複」的選項
+        Object.keys(currentMap).forEach(option => {
+          const count = currentMap[option];
+          if (count <= 0) return; // 如果該色球已經被抽光，就不長出分支
+
+          currentId++;
+          const myId = "node_" + currentId;
+          
+          // 計算機率並自動化簡分數
+          let probText = "";
+          if (isProbVisible) {
+            probText = formatFraction(count, totalItems);
+          }
+          const branchLabel = probText ? `|${probText}| ` : "";
+
+          // 寫入 Mermaid 語法
+          mermaidSyntax += `  ${parentId} --> ${branchLabel}${myId}(${option})\n`;
+          layersNodeMap[currentDepth].push(myId); 
+          
+          // 複製一份目前的狀態傳給下一層
+          let nextMap = { ...currentMap };
+          if (mode === 'without') {
+            nextMap[option] -= 1; // 不放回：該選項數量減 1
+          }
+          
+          buildBranch(myId, currentDepth + 1, currentPath + " " + option, nextMap);
+        });
+      }
+
+      // 初始化根節點
+      mermaidSyntax += `  root((開始<br>Start))\n`;
+      layersNodeMap[0].push("root");
+      
+      // 開始根據頻率字典繪製
+      buildBranch("root", 1, "", initialMap);
+
+      // 繪製剩餘數量外框（只有在啟用且沒有重複物件時才會執行）
+      if (isCountVisible && !hasDuplicates) {
+        for (let d = 1; d <= depth; d++) {
+          if (layersNodeMap[d].length > 0) {
+            const remCount = (mode === 'with') ? rawOptions.length : (rawOptions.length - d + 1);
+            mermaidSyntax += `  subgraph sg_${d} ["剩餘個數 Remaining: ${remCount > 0 ? remCount : 0}"]\n`;
+            layersNodeMap[d].forEach(id => {
+              mermaidSyntax += `    ${id}\n`;
+            });
+            mermaidSyntax += `  end\n`;
+          }
+        }
+      }
+
+      // 渲染 Mermaid
+      const holder = document.getElementById('mermaid-holder');
+      holder.innerHTML = `<div id="tree-diagram" class="mermaid">${mermaidSyntax}</div>`;
+      
+      setTimeout(() => {
+        try {
+          mermaid.run({ nodes: document.querySelectorAll('.mermaid') });
+        } catch (err) {
+          console.error("Mermaid 渲染失敗:", err);
+        }
+      }, 50);
+
+      // 更新下方資訊欄
+      const modeText = mode === 'with' ? '有放回 (With Replacement)' : '不放回 (Without Replacement)';
+      const resultInfo = document.getElementById('result-info');
+      resultInfo.innerHTML = `
+        <p><strong>模式 (Mode):</strong> ${modeText}</p>
+        <p><strong>總路徑數量 (Total Outcomes):</strong> <span class="badge">${totalOutcomes.length}</span></p>
+        <p><strong>所有可能路徑 (Sample Space):</strong></p>
+        <div style="font-family: monospace; font-size: 15px; background: #f8fafc; padding: 12px; border-left: 4px solid #0284c7; border-radius: 0 6px 6px 0; max-height: 180px; overflow-y: auto;">
+          ${totalOutcomes.map((path, idx) => `[${idx + 1}] ${path}`).join('<br>')}
+        </div>
+      `;
+    }
+
+    window.onload = function() {
+      generateTree();
+    };
+  </script>
+</body>
+</html>
