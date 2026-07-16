@@ -7,23 +7,25 @@
     <style>
         /* 基礎全域設定 */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background-color: #f4f7f6; /* 溫和的淡灰綠色背景 */
             color: #333;
             margin: 0;
             padding: 40px 20px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* 主容器 */
+        /* 主容器：拉寬最大寬度，更適合平板與電腦展示 */
         .container {
-            max-width: 800px;
+            max-width: 1050px;
             width: 100%;
             background: #ffffff;
             padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05); /* 輕微的陰影，讓畫面有層次感 */
+            border-radius: 20px;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.04);
+            box-sizing: border-box;
         }
 
         /* 主標題樣式 */
@@ -31,19 +33,47 @@
             color: #1a4f43; /* 深翡翠綠 */
             text-align: center;
             font-size: 2.2em;
+            margin-top: 10px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+        }
+
+        /* 快速導覽列 (Quick Navigation) */
+        .quick-nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
             margin-bottom: 40px;
             border-bottom: 2px solid #e2ebd5;
-            padding-bottom: 15px;
+            padding-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .quick-nav a {
+            background: #eef5f1;
+            color: #1a4f43;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+        }
+
+        .quick-nav a:hover {
+            background: #1a4f43;
+            color: #fff;
         }
 
         /* 章節年級小標題 */
         h3 {
             color: #2c3e50;
             font-size: 1.4em;
-            margin-top: 30px;
-            margin-bottom: 15px;
+            margin-top: 40px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
+            scroll-margin-top: 20px; /* 錨點滑動留空 */
         }
 
         /* 加上年級專屬的小裝飾 */
@@ -53,14 +83,34 @@
             font-size: 1.1em;
         }
 
-        /* 清單改為無序，準備製作成卡片 */
+        /* 響應式網格：核心排版改動！電腦 3 欄、iPad 2 欄、手機 1 欄 */
         ol {
             list-style: none;
             padding: 0;
             margin: 0;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* 自動排版，大螢幕並排，手機單行 */
-            gap: 15px;
+            grid-template-columns: repeat(3, 1fr); /* 電腦預設 3 欄並排 */
+            gap: 20px;
+        }
+
+        /* 針對 iPad / 平板（螢幕寬度小於 900px）改為 2 欄 */
+        @media (max-width: 900px) {
+            ol {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* 針對 手機（螢幕寬度小於 600px）改為 1 欄 */
+        @media (max-width: 600px) {
+            ol {
+                grid-template-columns: 1fr;
+            }
+            h2 {
+                font-size: 1.8em;
+            }
+            .container {
+                padding: 20px;
+            }
         }
 
         /* 單個卡片項目樣式 */
@@ -73,23 +123,25 @@
             display: block;
             background: #fafafa;
             border: 1px solid #e9e9e9;
-            padding: 18px 20px;
-            border-radius: 10px;
+            padding: 20px;
+            border-radius: 12px;
             color: #34495e;
             text-decoration: none;
             font-weight: 600;
-            transition: all 0.25s ease; /* 讓滑鼠移過時的動畫變平滑 */
+            height: 100%; /* 讓並排的卡片高度一樣高 */
+            box-sizing: border-box;
+            transition: all 0.25s ease;
             box-shadow: 0 2px 5px rgba(0,0,0,0.01);
             cursor: pointer;
         }
 
-        /* 滑鼠移到卡片上的變色效果 */
+        /* 滑鼠移到卡片上的變色與浮起效果 */
         li a:hover {
-            background: #1a4f43; /* 變成主色 */
-            color: #ffffff;      /* 文字變白色 */
+            background: #1a4f43; /* 主色：深翡翠綠 */
+            color: #ffffff;
             border-color: #1a4f43;
-            transform: translateY(-3px); /* 輕微向上浮起 */
-            box-shadow: 0 6px 15px rgba(26, 79, 67, 0.15); /* 加上帶有主題色的陰影 */
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(26, 79, 67, 0.15);
         }
 
         /* 自動在清單文字前加上數字編號 */
@@ -103,42 +155,61 @@
             transition: color 0.25s ease;
         }
         li a:hover::before {
-            color: #fff; /* 移過去時數字也變白色 */
+            color: #fff;
         }
 
         /* 當進入下一個 h3 時，數字重新計算 */
         h3 + ol {
             counter-reset: step-counter;
         }
+
+        /* 頁尾計數器樣式 */
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.85em;
+            color: #888;
+        }
+        .counter-img {
+            margin-top: 8px;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>👩‍🏫 歡迎來到 Miss Chow 的網站</h2>
+    <h2>👩‍🏫 歡迎來到 Miss Chow 的數學網站</h2>
 
-    <h3>S.4 Chapter 3 Functions and Graphs</h3>
+    <div class="quick-nav">
+        <a href="#s4-c3">S.4 Functions</a>
+        <a href="#s5-c10">S.5 Permutation</a>
+        <a href="#s5-c11">S.5 Probability</a>
+        <a href="#s6-c3">S.6 Graphs</a>
+    </div>
+
+    <h3 id="s4-c3">S.4 Chapter 3 Functions and Graphs</h3>
     <ol>
-        <li><a href="CompletingSquare.html">Completing Square</a></li>
+        <li><a href="CompletingSquare.html">Completing Square Exercise</a></li>
     </ol>
 
-    <h3>S.5 Chapter 10 Permutation and Combination</h3>
+    <h3 id="s5-c10">S.5 Chapter 10 Permutation and Combination</h3>
     <ol>
         <li><a href="Tree-Diagram.html">Tree Diagram</a></li>
         <li><a href="CountingPrinciples.html">Counting Principles Game</a></li>
         <li><a href="storybook.pdf" target="_blank">Story Telling - 冰室裡的數學魔法：排列與組合的奧秘</a></li>
-        <li><a href="Grouping_method.html">Must Be Together Explanation</a></li>
-        <li><a href="The_Gap_Method.html">Must Be Separated Explanation</a></li>
-        <li><a href="Exercise.html">Exercise of Together and Separated</a></li>
+        <li><a href="Grouping_method.html">Grouping Method (Permutations with Adjacent Items)</a></li>
+        <li><a href="The_Gap_Method.html">Gap Method (Permutations with No Two Items Adjacent)</a></li>
+        <li><a href="Exercise.html">DSE Drill: Adjacent & Separated Problems</a></li>
         <li><a href="WhoWantstoBeAMillionaire.html">Who Wants to Be A Millionaire 百萬富翁</a></li>
     </ol>
 
-    <h3>S.5 Chapter 11 More about Probability</h3>
+    <h3 id="s5-c11">S.5 Chapter 11 More about Probability</h3>
     <ol>
         <li><a href="Tree-Diagram2.html">Tree Diagram 2</a></li>
     </ol>
 
-    <h3>S.6 Chapter 3 More about Graphs of Functions</h3>
+    <h3 id="s6-c3">S.6 Chapter 3 More about Graphs of Functions</h3>
     <ol>
         <li><a href="graphdance.html">數學舞蹈家 Math Dance</a></li>
         <li><a href="TwoTransformation.html">Two Transformation Exercise</a></li>
@@ -147,19 +218,21 @@
     </ol>
 </div>
 
+<div class="footer">
+    <p>© 2026 Miss Chow's Math Room. All rights reserved.</p>
+    <div class="counter-img">
+        <img src="https://profile-counter.glitch.me/daisy-cmw/count.svg" alt="Visitor Count" style="height: 25px; filter: grayscale(30%);" />
+    </div>
+</div>
+
 <script>
     function checkQuizPassword() {
-        // 設定正確密碼
         const correctPassword = "ILoveMath";
-        
-        // 彈出密碼輸入框
         let userInput = prompt("請輸入訪問密碼以進入 Quiz：");
         
         if (userInput === correctPassword) {
-            // 密碼正確，跳轉到測驗頁面
             window.location.href = "Transformation-Quiz.html";
         } else if (userInput !== null) {
-            // 密碼錯誤（且不是點擊取消）
             alert("密碼錯誤！無法檢視試卷。");
         }
     }
