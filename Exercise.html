@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HKDSE Permutation & Combination Simulator</title>
+    <style>
+        :root {
+            --primary-color: #1e6091;
+            --accent-orange: #e65f2b;
+            --light-blue: #e8f1f5;
+            --bg-color: #f7f9fb;
+            --text-color: #2c3e50;
+            --border-color: #ccd9e8;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --selected-blue: #1b528a;
+            
+            /* Card Colors from User Interface */
+            --step1-gold: #cca025;
+            --step2-blue: #4a6fa5;
+            --step3-teal: #2a9d8f;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .badge {
+            background-color: var(--accent-orange);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .instruction {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        /* Strategy Selector Grid */
+        .strategy-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .strategy-btn {
+            background-color: #ffffff;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .strategy-btn.active {
+            background-color: var(--selected-blue);
+            border-color: var(--selected-blue);
+            color: white;
+        }
+
+        .strategy-title {
+            font-weight: bold;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .strategy-btn.active .strategy-title {
+            color: white;
+        }
+
+        .strategy-subtitle {
+            font-size: 11px;
+            color: #7f8c8d;
+        }
+
+        .strategy-btn.active .strategy-subtitle {
+            color: #d2e4f6;
+        }
+
+        /* Problem Box */
+        .problem-box {
+            background-color: var(--light-blue);
+            border-left: 5px solid var(--primary-color);
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 20px;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .problem-box p {
+            margin: 0 0 12px 0;
+        }
+
+        .problem-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        .highlight {
+            font-weight: bold;
+        }
+
+        /* Input and Actions Section */
+        .action-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            background-color: #fcfdfe;
+        }
+
+        .action-card h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: var(--text-color);
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .input-row label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .input-field {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 140px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-field:focus {
+            border-color: var(--primary-color);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.2s;
+        }
+
+        .btn-submit {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #219653;
+        }
+
+        .btn-random {
+            background-color: #34495e;
+            color: white;
+        }
+
+        .btn-random:hover {
+            background-color: #2c3e50;
+        }
+
+        /* --- DETAILED FEEDBACK PANEL STYLES --- */
+        .feedback-container {
+            display: none; /* Shown dynamically on submit */
+            margin-top: 25px;
+        }
+
+        /* Banner styling */
+        .alert-banner {
+            padding: 15px 20px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 25px;
+            border: 1px solid transparent;
+        }
+
+        .alert-banner.incorrect {
+            background-color: #fdf2f2;
+            border-color: #f8b4b4;
+            color: #9b1c1c;
+        }
+
+        .alert-banner.correct {
+            background-color: #f0fdf4;
+            border-color: #bbf7d0;
+            color: #166534;
+        }
+
+        .feedback-title {
+            font-size: 20px;
+            color: var(--primary-color);
+            margin: 0 0 8px 0;
+            font-weight: 700;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin-bottom: 20px;
+        }
+
+        .section-subtitle {
+            font-weight: bold;
+            font-size: 15px;
+            margin: 20px 0 10px 0;
+            color: #2d3748;
+        }
+
+        /* Visual Mapping Container */
+        .visual-mapping-box {
+            border: 1.5px dashed #a0aec0;
+            background-color: #fcfdfe;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .visual-mapping-entities {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 16px;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .visual-mapping-subtext {
+            font-size: 12px;
+            color: #e67e22;
+            font-weight: bold;
+        }
+
+        /* Steps Layout Grid */
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .step-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .step-header {
+            color: white;
+            font-weight: bold;
+            font-size: 13.5px;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .step-header.step1 { background-color: var(--step1-gold); }
+        .step-header.step2 { background-color: var(--step2-blue); }
+        .step-header.step3 { background-color: var(--step3-teal); }
+
+        .step-body {
+            padding: 15px;
+            font-size: 13px;
+            color: #4a5568;
+            line-height: 1.5;
+            text-align: center;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Formula Card & Details */
+        .calculation-card {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 24px;
+            border: 1px solid #edf2f7;
+            margin-bottom: 20px;
+        }
+
+        .formula-display-title {
+            font-weight: bold;
+            font-size: 15px;
+            margin-bottom: 15px;
+            color: #2d3748;
+        }
+
+        .formula-line {
+            text-align: center;
+            font-size: 18px;
+            color: #1e6091;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .explanation-notes {
+            margin-top: 15px;
+        }
+
+        .explanation-notes h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #2d3748;
+        }
+
+        .explanation-notes ol {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #4a5568;
+        }
+
+        .explanation-notes li {
+            margin-bottom: 10px;
+        }
+
+        /* Math Typography */
+        .math-symbol {
+            font-family: "Georgia", serif;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .steps-grid {
+                grid-template-columns: 1fr;
+            }
+            .strategy-grid {
+                grid-template-columns: 1fr;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .badge {
+                align-self: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Main Header -->
+    <div class="header">
+        <h1>HKDSE Permutation & Combination Simulator</h1>
+        <span class="badge">Form 5 Intermediate-Advanced</span>
+    </div>
+
+    <div class="instruction">
+        Select a scenario strategy below to generate an interactive exam-style problem.
+    </div>
+
+    <!-- Strategy Selection Grid -->
+    <div class="strategy-grid">
+        <div class="strategy-btn active" id="btn-grouping" onclick="setStrategy('grouping')">
+            <div class="strategy-title">Strategy: Grouping Method</div>
+            <div class="strategy-subtitle">(Must be next to each other)</div>
+        </div>
+        <div class="strategy-btn" id="btn-gap" onclick="setStrategy('gap')">
+            <div class="strategy-title">Strategy: Gap Method</div>
+            <div class="strategy-subtitle">(Cannot be consecutive)</div>
+        </div>
+    </div>
+
+    <!-- Dynamic Problem Description Box -->
+    <div class="problem-box">
+        <p id="problem-p1">Each day, Ann publishes a new video to her channel. <span class="highlight" id="lbl-total-pool">10</span> videos are selected from <span class="highlight" id="lbl-travel-pool">4</span> different travel videos and <span class="highlight" id="lbl-food-pool">6</span> different food videos, and they are scheduled to be published sequentially over the next <span class="highlight" id="lbl-total-selected">7</span> days.</p>
+        <p id="problem-p2">In how many different ways can the videos be published if <span class="highlight" id="lbl-travel-select">4</span> travel videos and <span class="highlight" id="lbl-food-select">3</span> food videos are required, and <span class="highlight" id="lbl-condition">all selected food videos must be published together next to each other</span>?</p>
+    </div>
+
+    <!-- Interactive Action Card -->
+    <div class="action-card">
+        <h3>Your Answers:</h3>
+        <div class="input-row">
+            <label for="numerical-answer">Final Numerical Answer:</label>
+            <input type="number" id="numerical-answer" class="input-field" placeholder="e.g. 14400">
+        </div>
+        <div class="button-group">
+            <button class="btn btn-submit" onclick="handleSubmit()">Submit & Analyze</button>
+            <button class="btn btn-random" onclick="handleRandomize()">Randomize Numbers</button>
+        </div>
+    </div>
+
+    <!-- NEW: DETAILED TEXTBOOK BREAKDOWN FEEDBACK CONTAINER -->
+    <div id="feedback-container" class="feedback-container">
+        <!-- Dyn Banner -->
+        <div id="feedback-banner" class="alert-banner"></div>
+
+        <h2 class="feedback-title">Detailed Textbook Breakdown</h2>
+        <hr class="divider">
+
+        <div id="textbook-content">
+            <!-- Dynamic Content Injected Here -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // State Variables
+    let currentStrategy = 'grouping';
+    
+    // Core parameters (Defaults matching screenshot)
+    let poolTravel = 4;
+    let poolFood = 6;
+    let selectTravel = 4;
+    let selectFood = 3;
+    let correctValue = 14400; // C(4,4) * C(6,3) * 5! * 3! = 1 * 20 * 120 * 6 = 14,400
+
+    // Utility Helpers
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function nCr(n, r) {
+        if (r < 0 || r > n) return 0;
+        if (r === 0 || r === n) return 1;
+        let num = 1, den = 1;
+        for (let i = 1; i <= r; i++) {
+            num *= (n - i + 1);
+            den *= i;
+        }
+        return num / den;
+    }
+
+    function factorial(n) {
+        if (n < 0) return 0;
+        if (n === 0 || n === 1) return 1;
+        let res = 1;
+        for (let i = 2; i <= n; i++) res *= i;
+        return res;
+    }
+
+    function formatNumberWithCommas(x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    // Handlers
+    function setStrategy(strategy) {
+        currentStrategy = strategy;
+        document.getElementById('btn-grouping').classList.toggle('active', strategy === 'grouping');
+        document.getElementById('btn-gap').classList.toggle('active', strategy === 'gap');
+        
+        hideFeedback();
+        handleRandomize();
+    }
+
+    function hideFeedback() {
+        document.getElementById('feedback-container').style.display = 'none';
+        document.getElementById('numerical-answer').value = '';
+    }
+
+    function handleRandomize() {
+        hideFeedback();
+
+        if (currentStrategy === 'grouping') {
+            poolTravel = getRandomInt(4, 7);
+            poolFood = getRandomInt(4, 8);
+            
+            selectTravel = getRandomInt(2, poolTravel);
+            selectFood = getRandomInt(2, poolFood);
+            
+            let totalSelected = selectTravel + selectFood;
+            let totalPool = poolTravel + poolFood;
+
+            // DOM Updates
+            document.getElementById('lbl-total-pool').innerText = totalPool;
+            document.getElementById('lbl-travel-pool').innerText = poolTravel;
+            document.getElementById('lbl-food-pool').innerText = poolFood;
+            document.getElementById('lbl-total-selected').innerText = totalSelected;
+            document.getElementById('lbl-travel-select').innerText = selectTravel;
+            document.getElementById('lbl-food-select').innerText = selectFood;
+            document.getElementById('lbl-condition').innerText = "all selected food videos must be published together next to each other";
+
+            // Calculation
+            correctValue = nCr(poolTravel, selectTravel) * nCr(poolFood, selectFood) * factorial(selectTravel + 1) * factorial(selectFood);
+
+        } else {
+            poolTravel = getRandomInt(4, 7);
+            poolFood = getRandomInt(4, 6);
+            
+            selectTravel = getRandomInt(3, poolTravel);
+            // Must have enough gaps for food: selectFood <= selectTravel + 1
+            let maxFoodSelect = Math.min(poolFood, selectTravel + 1);
+            selectFood = getRandomInt(2, maxFoodSelect);
+
+            let totalSelected = selectTravel + selectFood;
+            let totalPool = poolTravel + poolFood;
+
+            // DOM Updates
+            document.getElementById('lbl-total-pool').innerText = totalPool;
+            document.getElementById('lbl-travel-pool').innerText = poolTravel;
+            document.getElementById('lbl-food-pool').innerText = poolFood;
+            document.getElementById('lbl-total-selected').innerText = totalSelected;
+            document.getElementById('lbl-travel-select').innerText = selectTravel;
+            document.getElementById('lbl-food-select').innerText = selectFood;
+            document.getElementById('lbl-condition').innerText = "no two food videos are published next to each other";
+
+            // Calculation
+            let gaps = selectTravel + 1;
+            correctValue = nCr(poolTravel, selectTravel) * nCr(poolFood, selectFood) * factorial(selectTravel) * nCr(gaps, selectFood) * factorial(selectFood);
+        }
+    }
+
+    function handleSubmit() {
+        const userInputVal = document.getElementById('numerical-answer').value.trim();
+        if (userInputVal === "") {
+            alert("Please enter a numerical answer first!");
+            return;
+        }
+
+        const userAns = parseInt(userInputVal);
+        const feedbackContainer = document.getElementById('feedback-container');
+        const banner = document.getElementById('feedback-banner');
+        const textbook = document.getElementById('textbook-content');
+
+        const formattedCorrect = formatNumberWithCommas(correctValue);
+        const formattedUser = formatNumberWithCommas(userAns);
+
+        const isCorrect = (userAns === correctValue);
+
+        // Show banner
+        if (isCorrect) {
+            banner.className = "alert-banner correct";
+            banner.innerHTML = `✓ Correct! Your answer: ${formattedUser}. Excellent calculations!`;
+        } else {
+            banner.className = "alert-banner incorrect";
+            banner.innerHTML = `✗ Incorrect. Your answer: ${formattedUser}. Correct Answer: ${formattedCorrect}. Study the structural workflow blocks below.`;
+        }
+
+        // Generate Textbook Layout
+        let textbookHTML = '';
+
+        if (currentStrategy === 'grouping') {
+            const chooseTravel = nCr(poolTravel, selectTravel);
+            const chooseFood = nCr(poolFood, selectFood);
+            const extArr = selectTravel + 1;
+            const extWays = factorial(extArr);
+            const intWays = factorial(selectFood);
+
+            // Create Visual String like: [ T1 ] [ T2 ] ... [ T4 ] { F1, F2, ... F3 }
+            let tList = [];
+            for(let i=1; i<=selectTravel; i++) {
+                if (i <= 2 || i === selectTravel) {
+                    tList.push(`[ T${i} ]`);
+                } else if (i === 3 && selectTravel > 3) {
+                    tList.push(`...`);
+                }
+            }
+            let visualList = tList.join(" ") + ` &nbsp; <span style="border: 1px solid #e67e22; padding: 4px 8px; border-radius: 6px; background-color: #fffaf0; color: #e67e22; font-weight: bold;">{ F1, F2, ... F${selectFood} }</span>`;
+
+            textbookHTML = `
+                <div class="section-subtitle">Visual Mapping (The Grouping / Block Method):</div>
+                <div class="visual-mapping-box">
+                    <div class="visual-mapping-entities">${visualList}</div>
+                    <div class="visual-mapping-subtext">Total entities to arrange dynamically = ${selectTravel} + 1 = ${extArr}</div>
+                </div>
+
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <div class="step-header step1">Step 1: Select Pools</div>
+                        <div class="step-body">
+                            Choose items from pools:<br>
+                            Travel: <span class="math-symbol">C<sup>${poolTravel}</sup><sub>${selectTravel}</sub></span> = ${chooseTravel}<br>
+                            Food: <span class="math-symbol">C<sup>${poolFood}</sup><sub>${selectFood}</sub></span> = ${chooseFood}
+                        </div>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-header step2">Step 2: External Row</div>
+                        <div class="step-body">
+                            Treat the food block as 1 item. Arrange all total (${selectTravel} + 1) items:<br>
+                            <strong>${extArr}!</strong> ways
+                        </div>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-header step3">Step 3: Internal Block</div>
+                        <div class="step-body">
+                            Rearrange the food items inside their own bounded group block:<br>
+                            <strong>${selectFood}!</strong> ways
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calculation-card">
+                    <div class="formula-display-title">Calculated Formula:</div>
+                    <div class="formula-line">
+                        Total Ways = 
+                        <span class="math-symbol">C<sup>${poolTravel}</sup><sub>${selectTravel}</sub> &times; C<sup>${poolFood}</sup><sub>${selectFood}</sub> &times; ${extArr}! &times; ${selectFood}! = ${formattedCorrect}</span>
+                    </div>
+
+                    <div class="explanation-notes">
+                        <h4>Explanation Notes:</h4>
+                        <ol>
+                            <li>Since the food videos must stick together, we employ the <strong>Grouping Method</strong>.</li>
+                            <li>First, select the combinations: <span class="math-symbol">C<sup>${poolTravel}</sup><sub>${selectTravel}</sub></span> ways for travel videos and <span class="math-symbol">C<sup>${poolFood}</sup><sub>${selectFood}</sub></span> ways for food videos.</li>
+                            <li>Treat the collective group of ${selectFood} food videos as 1 combined individual block element. This leaves us with <strong>${selectTravel} + 1 = ${extArr}</strong> distinct items to arrange linearly, yielding <strong>${extArr}!</strong> ways.</li>
+                            <li>Finally, account for the internal arrangements of the food items inside that shared bundle block, which contributes an extra factor of <strong>${selectFood}!</strong>.</li>
+                        </ol>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Gap Method
+            const chooseTravel = nCr(poolTravel, selectTravel);
+            const chooseFood = nCr(poolFood, selectFood);
+            const extWays = factorial(selectTravel);
+            const totalGaps = selectTravel + 1;
+            const gapSelect = nCr(totalGaps, selectFood);
+            const foodArr = factorial(selectFood);
+
+            // Visual Mapping for Gap Method:  _ [ T1 ] _ [ T2 ] _ [ T3 ] _
+            let gapList = [];
+            for(let i=1; i<=selectTravel; i++) {
+                gapList.push(`_`);
+                gapList.push(`[ T${i} ]`);
+            }
+            gapList.push(`_`);
+            let visualList = gapList.join(" ");
+
+            textbookHTML = `
+                <div class="section-subtitle">Visual Mapping (The Gap Method):</div>
+                <div class="visual-mapping-box">
+                    <div class="visual-mapping-entities">${visualList}</div>
+                    <div class="visual-mapping-subtext">Insert ${selectFood} food items into the ${totalGaps} available gap placeholders "_"</div>
+                </div>
+
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <div class="step-header step1">Step 1: Select Pools</div>
+                        <div class="step-body">
+                            Choose items from pools:<br>
+                            Travel: <span class="math-symbol">C<sup>${poolTravel}</sup><sub>${selectTravel}</sub></span> = ${chooseTravel}<br>
+                            Food: <span class="math-symbol">C<sup>${poolFood}</sup><sub>${selectFood}</sub></span> = ${chooseFood}
+                        </div>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-header step2">Step 2: Arrange Travel</div>
+                        <div class="step-body">
+                            Line up the ${selectTravel} selected travel items first:<br>
+                            <strong>${selectTravel}!</strong> ways
+                        </div>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-header step3">Step 3: Insert Food</div>
+                        <div class="step-body">
+                            Choose ${selectFood} gaps out of ${totalGaps} and permute the food items:<br>
+                            <span class="math-symbol">C<sup>${totalGaps}</sup><sub>${selectFood}</sub> &times; ${selectFood}!</span> ways
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calculation-card">
+                    <div class="formula-display-title">Calculated Formula:</div>
+                    <div class="formula-line">
+                        Total Ways = 
+                        <span class="math-symbol">C<sup>${poolTravel}</sup><sub>${selectTravel}</sub> &times; C<sup>${poolFood}</sup><sub>${selectFood}</sub> &times; ${selectTravel}! &times; C<sup>${totalGaps}</sup><sub>${selectFood}</sub> &times; ${selectFood}! = ${formattedCorrect}</span>
+                    </div>
+
+                    <div class="explanation-notes">
+                        <h4>Explanation Notes:</h4>
+                        <ol>
+                            <li>Since no two food videos can be adjacent, we utilize the <strong>Gap Method</strong>.</li>
+                            <li>First, select combinations: <span class="math-symbol">C<sup>${poolTravel}</sup><sub>${selectTravel}</sub></span> ways for travel videos and <span class="math-symbol">C<sup>${poolFood}</sup><sub>${selectFood}</sub></span> ways for food videos.</li>
+                            <li>Arrange the ${selectTravel} travel videos in a line, creating <strong>${selectTravel}!</strong> arrangements.</li>
+                            <li>This creates <strong>${selectTravel} + 1 = ${totalGaps}</strong> gaps (including both ends). Select ${selectFood} gaps for the food videos and arrange them: <span class="math-symbol">C<sup>${totalGaps}</sup><sub>${selectFood}</sub> &times; ${selectFood}!</span> ways.</li>
+                        </ol>
+                    </div>
+                </div>
+            `;
+        }
+
+        textbook.innerHTML = textbookHTML;
+        feedbackContainer.style.display = 'block';
+        
+        // Auto scroll to feedback beautifully
+        feedbackContainer.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Load initial configuration matching exact screenshot
+    window.onload = function() {
+        poolTravel = 4;
+        poolFood = 6;
+        selectTravel = 4;
+        selectFood = 3;
+        correctValue = 14400; // Correct initial mathematical value
+
+        document.getElementById('lbl-total-pool').innerText = 10;
+        document.getElementById('lbl-travel-pool').innerText = 4;
+        document.getElementById('lbl-food-pool').innerText = 6;
+        document.getElementById('lbl-total-selected').innerText = 7;
+        document.getElementById('lbl-travel-select').innerText = 4;
+        document.getElementById('lbl-food-select').innerText = 3;
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Grouping Method (Block Method)</title>
+    <style>
+        :root {
+            --primary-color: #1e6c93;
+            --text-dark: #2c3e50;
+            --bg-light: #f8f9fa;
+            --accent-orange: #e67e22;
+            --accent-blue: #2980b9;
+            --btn-active: #27ae60;
+            --btn-inactive: #34495e;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: start;
+        }
+
+        .main-card {
+            background: #ffffff;
+            max-width: 850px;
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 40px;
+            border-left: 6px solid #f1c40f;
+            position: relative;
+        }
+
+        h1 {
+            color: #1a365d;
+            font-size: 24px;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .divider {
+            border-top: 1px dashed #cbd5e1;
+            margin-bottom: 25px;
+        }
+
+        h2 {
+            color: #2c3e50;
+            font-size: 16px;
+            margin-top: 20px;
+            margin-bottom: 15px;
+        }
+
+        p, li {
+            color: #4a5568;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        strong {
+            color: #1a202c;
+        }
+
+        .problem-scenario {
+            background-color: #f2f9f2;
+            border-left: 4px solid #27ae60;
+            padding: 15px 20px;
+            border-radius: 4px;
+            margin: 25px 0;
+            font-style: italic;
+        }
+
+        .problem-scenario strong {
+            font-style: normal;
+        }
+
+        /* Card Display Area */
+        .display-container {
+            background-color: #ebedef;
+            border-radius: 8px;
+            padding: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            min-height: 140px;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .item-card {
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+
+        .card-t {
+            border: 2px solid #2980b9;
+            color: #2980b9;
+            background-color: #eef7fc;
+        }
+
+        .card-f {
+            border: 2px solid #e67e22;
+            color: #e67e22;
+            background-color: #fdf5ee;
+        }
+
+        /* Group block container for step 2+ */
+        .group-block {
+            border: 2px dashed #2980b9;
+            background-color: rgba(41, 128, 185, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            position: relative;
+        }
+
+        .group-block::before {
+            content: "1 Unit (Block)";
+            position: absolute;
+            top: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: #2980b9;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        /* Button group layout */
+        .btn-group {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .step-btn {
+            background-color: var(--btn-inactive);
+            color: white;
+            border: none;
+            padding: 12px 5px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.2s;
+        }
+
+        .step-btn.active {
+            background-color: var(--btn-active);
+        }
+
+        /* Info box area */
+        .info-box {
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background-color: #fff;
+            overflow: hidden;
+        }
+
+        .info-header {
+            background-color: #cbd5e1;
+            color: #334155;
+            padding: 10px 15px;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .setup-tag {
+            background-color: #7f8c8d;
+            color: white;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: normal;
+        }
+
+        .info-body {
+            padding: 20px;
+            min-height: 100px;
+            background-color: #f8fafc;
+        }
+
+        @media (max-width: 600px) {
+            .btn-group {
+                grid-template-columns: 1fr;
+            }
+            .main-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-card">
+        <h1>The Grouping Method (Block Method)</h1>
+        <div class="divider"></div>
+
+        <h2>When do we use this?</h2>
+        <p>In HKDSE Permutation questions, if specific items <strong>"must be together"</strong> or <strong>"must be next to each other"</strong>, we use the <strong>Grouping (or Block) Method</strong>.</p>
+        
+        <p><strong>Step 1 (Internal):</strong> Treat the restricted items as a single "block". Find the number of ways to arrange them <em>inside</em> that block.</p>
+        <p><strong>Step 2 (External):</strong> Treat that entire block as <strong>ONE single item</strong>. Combine it with the remaining items, and find the total number of ways to arrange all units externally.</p>
+
+        <div class="problem-scenario">
+            <strong>Problem Scenario:</strong> Ann wants to publish 5 videos (3 Travel videos and 2 Food videos) in a row over 5 days. However, the <strong>3 Travel videos must be published on consecutive days</strong> (they must stay together). In how many different ways can she arrange her schedule?
+        </div>
+
+        <!-- Animation Display Area -->
+        <div class="display-container" id="displayContainer">
+            <!-- Cards will be dynamically injected here via JS -->
+        </div>
+
+        <!-- Interactive Step Tabs -->
+        <div class="btn-group">
+            <button class="step-btn active" onclick="switchStep(1)">Step 1: Initial State</button>
+            <button class="step-btn" onclick="switchStep(2)">Step 2: Tie Together</button>
+            <button class="step-btn" onclick="switchStep(3)">Step 3: Arrange Blocks</button>
+            <button class="step-btn" onclick="switchStep(4)">Step 4: Internal Rearrange</button>
+        </div>
+
+        <!-- Instruction Status Box -->
+        <div class="info-box">
+            <div class="info-header">
+                <span id="infoHeaderTitle">Step 1: Identify individual elements</span>
+                <span class="setup-tag" id="infoTag">Setup</span>
+            </div>
+            <div class="info-body" id="infoBodyContent">
+                We have 5 independent videos to schedule. The condition states that the 3 Travel videos (T1, T2, T3) must always appear back-to-back.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const stepsData = {
+            1: {
+                title: "Step 1: Identify individual elements",
+                tag: "Setup",
+                text: "We have 5 independent videos to schedule. The condition states that the 3 Travel videos (T1, T2, T3) must always appear back-to-back.",
+                html: `
+                    <div class="item-card card-t">T1</div>
+                    <div class="item-card card-t">T2</div>
+                    <div class="item-card card-t">T3</div>
+                    <div class="item-card card-f">F1</div>
+                    <div class="item-card card-f">F2</div>
+                `
+            },
+            2: {
+                title: "Step 2: Tie the restricted items together",
+                tag: "Grouping",
+                text: "Group the 3 Travel videos (T1, T2, T3) into a single structural block. Now, this block counts as <strong>1 large single item</strong>.",
+                html: `
+                    <div class="group-block">
+                        <div class="item-card card-t">T1</div>
+                        <div class="item-card card-t">T2</div>
+                        <div class="item-card card-t">T3</div>
+                    </div>
+                    <div class="item-card card-f">F1</div>
+                    <div class="item-card card-f">F2</div>
+                `
+            },
+            3: {
+                title: "Step 3: External Arrangement",
+                tag: "Calculation",
+                text: "Treat the block as 1 unit. Together with F1 and F2, we have a total of <strong>3 units</strong> to arrange dynamic slots. <br>Number of external arrangements = <strong>3! = 6</strong>.",
+                html: `
+                    <div class="item-card card-f">F1</div>
+                    <div class="group-block" style="border-color: #27ae60; background-color: rgba(39, 174, 96, 0.1);">
+                        <div class="item-card card-t">T1</div>
+                        <div class="item-card card-t">T2</div>
+                        <div class="item-card card-t">T3</div>
+                    </div>
+                    <div class="item-card card-f">F2</div>
+                `
+            },
+            4: {
+                title: "Step 4: Internal Rearrangement",
+                tag: "Final Answer",
+                text: "Inside the block, the 3 Travel videos can shuffle among themselves (e.g., T2, T1, T3). <br>Number of internal arrangements = <strong>3! = 6</strong>. <br><br><strong>Total Ways = External × Internal = 3! × 3! = 6 × 6 = 36 ways.</strong>",
+                html: `
+                    <div class="item-card card-f">F1</div>
+                    <div class="group-block" style="border-color: #e67e22; background-color: rgba(230, 126, 34, 0.1);">
+                        <div class="item-card card-t">T2</div>
+                        <div class="item-card card-t">T1</div>
+                        <div class="item-card card-t">T3</div>
+                    </div>
+                    <div class="item-card card-f">F2</div>
+                `
+            }
+        };
+
+        function switchStep(stepNum) {
+            // Update active button styling
+            const buttons = document.querySelectorAll('.step-btn');
+            buttons.forEach((btn, index) => {
+                if (index === (stepNum - 1)) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Update content display with smooth transitions
+            const data = stepsData[stepNum];
+            document.getElementById('displayContainer').innerHTML = data.html;
+            document.getElementById('infoHeaderTitle').innerText = data.title;
+            document.getElementById('infoTag').innerText = data.tag;
+            document.getElementById('infoBodyContent').innerHTML = data.text;
+        }
+
+        // Initialize the view with step 1
+        window.onload = function() {
+            switchStep(1);
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Gap Method - Permutation & Combination</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            padding: 30px;
+            box-sizing: border-box;
+        }
+        h1 {
+            color: #1e3a8a;
+            font-size: 28px;
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+        .instruction-card {
+            border-left: 5px solid #3b82f6;
+            background-color: #f0f7ff;
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 25px;
+        }
+        .instruction-card h2 {
+            margin-top: 0;
+            color: #1e40af;
+            font-size: 18px;
+        }
+        .instruction-card p {
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        .instruction-card ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .instruction-card li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+            background-color: #f1f5f9;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        @media (max-width: 600px) {
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .control-label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #475569;
+            display: flex;
+            justify-content: space-between;
+        }
+        .control-label span.val {
+            color: #2563eb;
+            font-family: monospace;
+            font-size: 15px;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #cbd5e1;
+            border-radius: 3px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        .btn-container {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .btn {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn:hover {
+            background-color: #059669;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .visualization-box {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background-color: #f8fafc;
+            margin-bottom: 25px;
+            overflow: hidden;
+            position: relative;
+        }
+        .result-bar {
+            background-color: #1e293b;
+            color: #f8fafc;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+        .explanation-card {
+            border-left: 5px solid #10b981;
+            background-color: #f0fdf4;
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+        .explanation-card p {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+        .explanation-card strong {
+            color: #065f46;
+        }
+        .math-expr {
+            font-weight: bold;
+            color: #047857;
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+        }
+
+        /* Animation elements */
+        .anim-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            width: 100%;
+            min-height: 120px;
+            position: relative;
+        }
+        .anim-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 18px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            user-select: none;
+        }
+        .travel-item {
+            width: 55px;
+            height: 55px;
+            border-radius: 10px;
+            background-color: #3498db;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.4s ease-out;
+        }
+        .travel-item.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .food-item {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #e67e22;
+            opacity: 0;
+            transform: translateY(-20px) scale(0.5);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .food-item.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        .arrow-gap {
+            font-size: 24px;
+            font-weight: bold;
+            color: #9b59b6; /* Purple color for the arrows */
+            width: 30px;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s ease-out;
+        }
+        .arrow-gap.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .placeholder-text {
+            color: #64748b;
+            font-size: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>The Gap Method</h1>
+
+    <div class="instruction-card">
+        <h2>When do we use this?</h2>
+        <p>In Permutation & Combination, if a question states that certain items <strong>"must be separated"</strong> or <strong>"cannot be on consecutive days"</strong>, we use the <strong>Gap Method</strong>.</p>
+        <ol>
+            <li><strong>Step 1:</strong> Arrange the unrestricted items first.</li>
+            <li><strong>Step 2:</strong> Identify the gaps (spaces) between and around these items.</li>
+            <li><strong>Step 3:</strong> Select and arrange the restricted items into those gaps.</li>
+        </ol>
+    </div>
+
+    <div class="controls-grid">
+        <div class="control-group">
+            <div class="control-label">
+                <span>Total Travel Videos available (N<sub>t</sub>):</span>
+                <span class="val" id="val-nt">5</span>
+            </div>
+            <input type="range" id="input-nt" min="1" max="8" value="5">
+        </div>
+
+        <div class="control-group">
+            <div class="control-label">
+                <span>Total Food Videos available (N<sub>f</sub>):</span>
+                <span class="val" id="val-nf">6</span>
+            </div>
+            <input type="range" id="input-nf" min="1" max="8" value="6">
+        </div>
+
+        <div class="control-group">
+            <div class="control-label">
+                <span>Travel Videos to arrange (T):</span>
+                <span class="val" id="val-t">4</span>
+            </div>
+            <input type="range" id="input-t" min="1" max="8" value="4">
+        </div>
+
+        <div class="control-group">
+            <div class="control-label">
+                <span>Food Videos to arrange (F):</span>
+                <span class="val" id="val-f">3</span>
+            </div>
+            <input type="range" id="input-f" min="1" max="9" value="3">
+        </div>
+    </div>
+
+    <div class="btn-container">
+        <button class="btn" id="btn-animate" onclick="playAnimation()">Play Visualization Animation</button>
+    </div>
+
+    <div class="visualization-box" id="visualization-box">
+        <div class="placeholder-text" id="placeholder">Adjust sliders and click "Play Animation"</div>
+    </div>
+
+    <div class="result-bar" id="result-formula">
+        Total Ways = 5P4 × 6C3 × 5P3 = 144,000
+    </div>
+
+    <div class="explanation-card">
+        <p><strong>Step 1:</strong> Select and arrange <span id="exp-t">4</span> Travel videos from <span id="exp-nt">5</span> available &rarr; <span class="math-expr" id="math-step1">5P4</span></p>
+        <p><strong>Step 2:</strong> Select <span id="exp-f">3</span> Food videos from <span id="exp-nf">6</span> available (order doesn't matter yet) &rarr; <span class="math-expr" id="math-step2">6C3</span></p>
+        <p><strong>Step 3:</strong> If we lay out the <span id="exp-t2">4</span> Travel videos, they create <span id="exp-gaps">5</span> available spaces (gaps). We arrange the <span id="exp-f2">3</span> Food videos into these <span id="exp-gaps2">5</span> spaces &rarr; <span class="math-expr" id="math-step3">5P3</span></p>
+    </div>
+</div>
+
+<script>
+    // Factorial helper
+    function fact(n) {
+        if (n < 0) return 0;
+        let r = 1;
+        for (let i = 2; i <= n; i++) r *= i;
+        return r;
+    }
+
+    // Permutation P(n, r)
+    function P(n, r) {
+        if (r < 0 || r > n) return 0;
+        return fact(n) / fact(n - r);
+    }
+
+    // Combination C(n, r)
+    function C(n, r) {
+        if (r < 0 || r > n) return 0;
+        return fact(n) / (fact(r) * fact(n - r));
+    }
+
+    // Elements
+    const inputNt = document.getElementById('input-nt');
+    const inputNf = document.getElementById('input-nf');
+    const inputT = document.getElementById('input-t');
+    const inputF = document.getElementById('input-f');
+
+    const valNt = document.getElementById('val-nt');
+    const valNf = document.getElementById('val-nf');
+    const valT = document.getElementById('val-t');
+    const valF = document.getElementById('val-f');
+
+    const expNt = document.getElementById('exp-nt');
+    const expNf = document.getElementById('exp-nf');
+    const expT = document.getElementById('exp-t');
+    const expT2 = document.getElementById('exp-t2');
+    const expF = document.getElementById('exp-f');
+    const expF2 = document.getElementById('exp-f2');
+    const expGaps = document.getElementById('exp-gaps');
+    const expGaps2 = document.getElementById('exp-gaps2');
+
+    const mathStep1 = document.getElementById('math-step1');
+    const mathStep2 = document.getElementById('math-step2');
+    const mathStep3 = document.getElementById('math-step3');
+
+    const resultFormula = document.getElementById('result-formula');
+    const vizBox = document.getElementById('visualization-box');
+    const placeholder = document.getElementById('placeholder');
+
+    function update() {
+        let nt = parseInt(inputNt.value);
+        let nf = parseInt(inputNf.value);
+        let t = parseInt(inputT.value);
+        let f = parseInt(inputF.value);
+
+        // Enforce constraints
+        if (t > nt) {
+            t = nt;
+            inputT.value = t;
+        }
+        if (f > nf) {
+            f = nf;
+            inputF.value = f;
+        }
+
+        // Display Slider values
+        valNt.innerText = nt;
+        valNf.innerText = nf;
+        valT.innerText = t;
+        valF.innerText = f;
+
+        // Calculate values
+        let gaps = t + 1;
+        let step1Val = P(nt, t);
+        let step2Val = C(nf, f);
+        let step3Val = P(gaps, f);
+        let totalWays = step1Val * step2Val * step3Val;
+
+        // Update Explanations
+        expNt.innerText = nt;
+        expNf.innerText = nf;
+        expT.innerText = t;
+        expT2.innerText = t;
+        expF.innerText = f;
+        expF2.innerText = f;
+        expGaps.innerText = gaps;
+        expGaps2.innerText = gaps;
+
+        mathStep1.innerText = `${nt}P${t} (${step1Val.toLocaleString()})`;
+        mathStep2.innerText = `${nf}C${f} (${step2Val.toLocaleString()})`;
+        
+        if (f > gaps) {
+            mathStep3.innerText = `${gaps}P${f} (0 - Not enough gaps!)`;
+            resultFormula.innerText = `Total Ways = ${nt}P${t} × ${nf}C${f} × ${gaps}P${f} = 0 (Impossible)`;
+        } else {
+            mathStep3.innerText = `${gaps}P${f} (${step3Val.toLocaleString()})`;
+            resultFormula.innerText = `Total Ways = ${nt}P${t} × ${nf}C${f} × ${gaps}P${f} = ${totalWays.toLocaleString()}`;
+        }
+    }
+
+    // Event listeners
+    inputNt.addEventListener('input', update);
+    inputNf.addEventListener('input', update);
+    inputT.addEventListener('input', update);
+    inputF.addEventListener('input', update);
+
+    // Initial load
+    update();
+
+    function playAnimation() {
+        let t = parseInt(inputT.value);
+        let f = parseInt(inputF.value);
+        let gaps = t + 1;
+
+        vizBox.innerHTML = ''; // Clear
+
+        const animContainer = document.createElement('div');
+        animContainer.className = 'anim-container';
+        vizBox.appendChild(animContainer);
+
+        // Step 1: Lay out Travel Items first (Blue Squares)
+        let travelElements = [];
+        let gapElements = [];
+
+        // We alternate the positions: Arrow, Travel, Arrow, Travel ... Arrow
+        for (let i = 0; i < t; i++) {
+            // Gap/Arrow slot
+            const gap = document.createElement('div');
+            gap.className = 'arrow-gap';
+            gap.innerText = '↑';
+            gap.id = `gap-${i}`;
+            animContainer.appendChild(gap);
+            gapElements.push(gap);
+
+            // Travel item
+            const item = document.createElement('div');
+            item.className = 'anim-item travel-item';
+            item.innerText = 'T';
+            animContainer.appendChild(item);
+            travelElements.push(item);
+        }
+        // Last Gap/Arrow slot
+        const lastGap = document.createElement('div');
+        lastGap.className = 'arrow-gap';
+        lastGap.innerText = '↑';
+        lastGap.id = `gap-${t}`;
+        animContainer.appendChild(lastGap);
+        gapElements.push(lastGap);
+
+        if (f > gaps) {
+            const warn = document.createElement('div');
+            warn.style.color = '#ef4444';
+            warn.style.fontWeight = 'bold';
+            warn.style.marginTop = '15px';
+            warn.innerText = `Cannot place ${f} food videos into ${gaps} gaps!`;
+            vizBox.appendChild(warn);
+            return;
+        }
+
+        // Animation Timeline:
+        // 1. Show Travel Videos first
+        travelElements.forEach((el, idx) => {
+            setTimeout(() => {
+                el.classList.add('visible');
+            }, idx * 150);
+        });
+
+        // 2. Show Purple Arrows (gaps) after Travel videos are placed
+        let arrowDelay = travelElements.length * 150 + 300;
+        gapElements.forEach((el, idx) => {
+            setTimeout(() => {
+                el.classList.add('visible');
+            }, arrowDelay + idx * 100);
+        });
+
+        // 3. Randomly select f gaps and replace the Arrow with Orange Food Video "F"
+        let foodDelay = arrowDelay + gapElements.length * 100 + 400;
+
+        let availableGaps = [];
+        for (let i = 0; i < gaps; i++) availableGaps.push(i);
+        
+        let selectedGaps = [];
+        for (let i = 0; i < f; i++) {
+            let randIdx = Math.floor(Math.random() * availableGaps.length);
+            selectedGaps.push(availableGaps.splice(randIdx, 1)[0]);
+        }
+        selectedGaps.sort((a,b) => a - b);
+
+        selectedGaps.forEach((gapIdx, step) => {
+            setTimeout(() => {
+                const gapEl = document.getElementById(`gap-${gapIdx}`);
+                if (gapEl) {
+                    // Hide the arrow
+                    gapEl.style.opacity = '0';
+                    gapEl.style.transform = 'scale(0)';
+                    
+                    // Create an orange Food circle "F" to replace it inside the same container slot
+                    setTimeout(() => {
+                        gapEl.innerHTML = '';
+                        // Remove inline styles so class transitions work correctly!
+                        gapEl.style.opacity = '';
+                        gapEl.style.transform = '';
+                        
+                        gapEl.className = 'anim-item food-item';
+                        gapEl.innerText = 'F';
+                        // Trigger visible state
+                        setTimeout(() => {
+                            gapEl.classList.add('visible');
+                        }, 50);
+                    }, 200);
+                }
+            }, foodDelay + (step * 500));
+        });
+    }
+</script>
+
+</body>
+</html>

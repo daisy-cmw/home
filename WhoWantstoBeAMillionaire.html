@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>排列與組合 Permutations & Combinations - 數學百萬富翁</title>
+    <style>
+        :root {
+            --bg-color: #03071e;
+            --primary-blue: #00b4d8;
+            --accent-cyan: #00f5d4;
+            --correct-green: #2ec4b6;
+            --wrong-red: #e63946;
+            --text-color: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            background: #000;
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 遊戲主容器 */
+        .game-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            max-width: 1024px;
+            max-height: 768px;
+            aspect-ratio: 4 / 3;
+            background: url('Millionaire.jpg') no-repeat center center;
+            background-size: cover;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* 頂部控制列：縮短並右移，100% 避開左上角本港台 Logo */
+        .top-bar {
+            position: absolute;
+            top: 20px;
+            left: 24%;
+            width: 42%;
+            height: 50px;
+            background-color: rgba(0, 8, 20, 0.9);
+            border: 2px solid var(--primary-blue);
+            border-radius: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-home {
+            background-color: rgba(0, 180, 216, 0.2);
+            border: 1px solid var(--primary-blue);
+            color: var(--accent-cyan);
+            padding: 5px 10px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-home:hover {
+            background-color: var(--primary-blue);
+            color: #000;
+        }
+
+        .game-title {
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px var(--primary-blue);
+        }
+
+        /* 錦囊區 */
+        .lifeline-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .lifeline-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .lifelines {
+            display: flex;
+            gap: 6px;
+        }
+
+        .lifeline-btn {
+            width: 38px;
+            height: 26px;
+            border-radius: 13px;
+            border: 2px solid var(--primary-blue);
+            background-color: rgba(0, 0, 0, 0.6);
+            color: var(--primary-blue);
+            font-weight: bold;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .lifeline-btn:hover:not(:disabled) {
+            background-color: var(--primary-blue);
+            color: #000;
+            box-shadow: 0 0 8px var(--primary-blue);
+        }
+
+        .lifeline-btn:disabled {
+            border-color: #444;
+            color: #444;
+            cursor: not-allowed;
+            text-decoration: line-through;
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        /* 右側面板：分數挑戰梯 */
+        .ladder-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 210px;
+            height: 440px; /* 限制高度防止與下方題目框重疊 */
+            background-color: rgba(0, 8, 20, 0.9);
+            border: 2px solid var(--primary-blue);
+            border-radius: 8px;
+            padding: 8px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .ladder-title {
+            text-align: center;
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--accent-cyan);
+            border-bottom: 1px solid rgba(0, 180, 216, 0.3);
+            padding-bottom: 3px;
+            margin-bottom: 3px;
+        }
+
+        .ladder-list {
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 1.5px;
+        }
+
+        .ladder-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 10.5px;
+            background-color: rgba(255, 255, 255, 0.03);
+            color: #b0b0b0;
+        }
+
+        .ladder-item.milestone {
+            color: #ffa200;
+            font-weight: bold;
+        }
+
+        .ladder-item.active {
+            background-color: #ffa200;
+            color: #000 !important;
+            font-weight: bold;
+            box-shadow: 0 0 8px #ffa200;
+        }
+
+        .ladder-item.passed {
+            color: #fff;
+        }
+
+        /* 題目框：字體加大，英文改為與中文同字體大小與白色 */
+        .question-box {
+            position: absolute;
+            top: 64.0%;
+            left: 5.7%;
+            width: 88.6%;
+            height: 11.2%;
+            background-color: rgba(0, 0, 0, 0.95);
+            color: #fff;
+            padding: 8px 30px;
+            font-size: 15.5px; /* 加大題目字體 */
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            box-sizing: border-box;
+            border-radius: 4px;
+            z-index: 5;
+        }
+
+        .question-text-zh {
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .question-text-en {
+            color: #fff; /* 英文統一使用白色 */
+            font-weight: normal;
+        }
+
+        /* 選項按鈕定位 */
+        .options-container {
+            position: absolute;
+            top: 77.8%;
+            left: 7.2%;
+            width: 85.6%;
+            height: 13.8%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            row-gap: 8px;
+            column-gap: 40px;
+            z-index: 5;
+        }
+
+        .option-btn {
+            background-color: rgba(0, 0, 0, 0.95);
+            border: 1px solid rgba(0, 180, 216, 0.5);
+            color: #fff;
+            border-radius: 30px;
+            font-size: 14.5px; /* 加大選項字體 */
+            text-align: left;
+            padding-left: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            outline: none;
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: rgba(0, 180, 216, 0.35);
+            border-color: var(--accent-cyan);
+        }
+
+        .option-btn.selected {
+            background-color: #ffa200;
+            border-color: #fff;
+            color: #000;
+        }
+
+        .option-btn.correct {
+            background-color: var(--correct-green) !important;
+            border-color: #fff !important;
+            color: #000 !important;
+        }
+
+        .option-btn.wrong {
+            background-color: var(--wrong-red) !important;
+            border-color: #fff !important;
+            color: #fff !important;
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        /* 中央解析面板 */
+        .explanation-overlay {
+            position: absolute;
+            top: 220px;
+            left: 10%;
+            width: 58%;
+            background-color: rgba(0, 8, 20, 0.96);
+            border: 2px solid #ff9f1c;
+            border-radius: 10px;
+            padding: 20px;
+            box-sizing: border-box;
+            display: none;
+            z-index: 20;
+            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
+        }
+
+        .explanation-overlay.correct-style {
+            border-color: var(--correct-green);
+        }
+
+        .explanation-overlay.wrong-style {
+            border-color: var(--wrong-red);
+        }
+
+        .explanation-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .explanation-content {
+            font-size: 15px; /* 加大解析字體 */
+            line-height: 1.6;
+            color: #fff; /* 解析內容與英文一律使用白色 */
+            max-height: 170px;
+            overflow-y: auto;
+        }
+
+        .explanation-action {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+
+        /* 經典橙色下一題/查看結果按鈕 */
+        .btn-next {
+            background-color: #ffa200;
+            color: #000;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 162, 0, 0.5);
+            transition: 0.2s;
+        }
+
+        .btn-next:hover {
+            background-color: #fff;
+            box-shadow: 0 0 15px #fff;
+        }
+
+        /* 📞 電話熱線彈出視窗 */
+        .phone-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+        }
+
+        .phone-card {
+            background: linear-gradient(135deg, #020c1b, #0d1b2a);
+            border: 2px solid var(--accent-cyan);
+            border-radius: 15px;
+            width: 440px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 0 25px rgba(0, 245, 212, 0.4);
+            animation: popIn 0.3s ease-out;
+        }
+
+        .phone-avatar {
+            font-size: 40px;
+            margin-bottom: 8px;
+            animation: ring 0.5s ease-in-out infinite alternate;
+        }
+
+        .phone-title {
+            color: var(--accent-cyan);
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .phone-msg {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #fff; /* 老師提示英文也改成白色 */
+            background-color: rgba(0,0,0,0.4);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            margin-bottom: 20px;
+            border-left: 3px solid var(--accent-cyan);
+        }
+
+        .phone-close {
+            background-color: var(--accent-cyan);
+            color: #000;
+            border: none;
+            padding: 8px 25px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .phone-close:hover {
+            background-color: #fff;
+            box-shadow: 0 0 10px #fff;
+        }
+
+        /* 滿版遮罩 */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 7, 30, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .overlay.hidden {
+            display: none;
+        }
+
+        .overlay-content {
+            text-align: center;
+            max-width: 500px;
+            padding: 30px;
+            border: 3px solid var(--primary-blue);
+            border-radius: 20px;
+            background-color: rgba(0, 8, 20, 0.95);
+            box-shadow: 0 0 30px rgba(0, 180, 216, 0.5);
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes ring {
+            0% { transform: rotate(-5deg); }
+            100% { transform: rotate(5deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-wrapper">
+
+        <!-- 起始畫面 (修改歡迎詞) -->
+        <div id="start-overlay" class="overlay">
+            <div class="overlay-content">
+                <h1 style="font-size: 26px; color: #fff; text-shadow: 0 0 15px var(--primary-blue); margin: 0 0 10px 0;">數學百萬富翁<br>Math Millionaire</h1>
+                <p style="font-size: 15px; color: #ccc; line-height: 1.6; margin: 0;">
+                    歡迎來到數學百萬富翁！我們提供「50:50」及「📞 電話求助老師」錦囊。<br>
+                    Are you ready for the Millionaire challenge?
+                </p>
+                <button class="btn-start" onclick="startGame()" style="background-color: var(--primary-blue); color:#000; border:none; padding:10px 30px; border-radius:20px; font-weight:bold; margin-top:20px; cursor:pointer;">開始挑戰 Start Game</button>
+            </div>
+        </div>
+
+        <!-- 結束畫面 -->
+        <div id="end-overlay" class="overlay hidden">
+            <div class="overlay-content">
+                <h1 id="end-title" style="font-size: 28px; text-shadow: 0 0 15px var(--correct-green); margin: 0 0 15px 0;">恭喜通關！</h1>
+                <p id="end-message" style="font-size: 15px; margin: 15px 0; line-height: 1.6;"></p>
+                <button class="btn-start" onclick="resetGame()" style="background-color: var(--primary-blue); color:#000; border:none; padding:10px 30px; border-radius:20px; font-weight:bold; cursor:pointer;">重新挑戰 Restart</button>
+            </div>
+        </div>
+
+        <!-- 頂部控制列 -->
+        <div class="top-bar">
+            <div class="logo-section">
+                <button class="btn-home" onclick="goHome()">🏠 Home</button>
+                <span class="game-title">數學百萬富翁</span>
+            </div>
+            <div class="lifeline-wrapper">
+                <span class="lifeline-label">錦囊:</span>
+                <div class="lifelines">
+                    <button id="btn-5050" class="lifeline-btn" onclick="use5050()">50:50</button>
+                    <button id="btn-phone" class="lifeline-btn" onclick="usePhone()">📞</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右側面板：分數挑戰梯 (保留「關卡」字眼) -->
+        <div class="ladder-panel">
+            <div class="ladder-title">分數挑戰梯 Score</div>
+            <div id="ladder-list" class="ladder-list"></div>
+        </div>
+
+        <!-- 中央彈出式答案解析區 -->
+        <div id="explanation-box" class="explanation-overlay">
+            <div id="explanation-title" class="explanation-title"></div>
+            <div id="explanation-content" class="explanation-content"></div>
+            <div class="explanation-action">
+                <button id="btn-next" class="btn-next" onclick="goToNextStep()">下一題 Next ➔</button>
+            </div>
+        </div>
+
+        <!-- 📞 電話熱線彈出視窗 -->
+        <div id="phone-modal" class="phone-overlay">
+            <div class="phone-card">
+                <div class="phone-avatar">👨‍🏫</div>
+                <div class="phone-title">正在通話中... Calling math teacher...</div>
+                <div id="phone-message" class="phone-msg">載入提示中...</div>
+                <button class="phone-close" onclick="closePhoneModal()">謝謝老師！ Thank you!</button>
+            </div>
+        </div>
+
+        <!-- 底部題目區 (中英字體同大同白，加大顯示) -->
+        <div id="question-box" class="question-box">Loading...</div>
+
+        <!-- 底部選項區 -->
+        <div class="options-container">
+            <button id="opt-A" class="option-btn" onclick="selectOption('A')">A: </button>
+            <button id="opt-B" class="option-btn" onclick="selectOption('B')">B: </button>
+            <button id="opt-C" class="option-btn" onclick="selectOption('C')">C: </button>
+            <button id="opt-D" class="option-btn" onclick="selectOption('D')">D: </button>
+        </div>
+
+    </div>
+
+    <script>
+        // 香港中五 DSE 數學科貼切術語 15 題數據庫 (排除了 linear permutation 術語)
+        const questions = [
+            { 
+                q_zh: "第 1 題：把 5 位同學排成一列拍攝照片，共有多少種不同的排列方法？",
+                q_en: "Q1: In how many different ways can 5 students be arranged in a line for a photo?", 
+                options: { A: "24", B: "60", C: "120", D: "720" }, 
+                correct: "C",
+                explain: "解析：這是典型的排列問題。5 位不同的同學排成一列，計算方法為 5! = 120。<br>Explain: This is a permutation problem. For 5 students arranged in a line, the calculation is 5! = 120.",
+                phoneTips: "喂？是我！這題排成一列就是『全排列』，直接算 5 的階乘 (5!) 就可以了。 Hello! Since they are arranged in a line, it's a simple permutation. Just calculate 5!."
+            },
+            { 
+                q_zh: "第 2 題：從 6 位候選人中挑選出 3 人擔任班級委員（職位不分先後），共有多少種不同的挑選方法？",
+                q_en: "Q2: In how many ways can 3 class committee members be chosen from 6 candidates (regardless of order)?", 
+                options: { A: "20", B: "40", C: "120", D: "18" }, 
+                correct: "A",
+                explain: "解析：選出來的委員不分職位先後，屬於組合問題，使用組合公式 C(6, 3) = 20。<br>Explain: Order does not matter, so this is a combination problem. Use C(6, 3) = 20.",
+                phoneTips: "注意『職位不分先後』代表順序不重要，要用組合 C。 Note that 'regardless of order' means order is not important. Use combination C(6, 3)."
+            },
+            { 
+                q_zh: "第 3 題：使用「M, A, T, H」這 4 個字母進行排列，可拼出多少個字母不重複的單詞組合？",
+                q_en: "Q3: How many words with non-repeating letters can be formed by arranging 'M, A, T, H'?", 
+                options: { A: "12", B: "24", C: "6", D: "48" }, 
+                correct: "B",
+                explain: "解析：將 4 個不重複的字母進行排列，計算方法為 4! = 24。<br>Explain: Arranging 4 distinct letters is a permutation: 4! = 24.",
+                phoneTips: "這題是 4 個相異字母的全排列 (4!)。 This is a simple permutation of 4 distinct letters, which is 4!."
+            },
+            { 
+                q_zh: "第 4 題：將 3 本不同的數學書與 2 本不同的中文書排成一列（無任何限制），共有多少種不同的排列方法？",
+                q_en: "Q4: In how many ways can 3 different math books and 2 different Chinese books be arranged in a line (no restrictions)?", 
+                options: { A: "12", B: "720", C: "120", D: "24" }, 
+                correct: "C",
+                explain: "解析：因為無任何限制，直接將 5 本不同的書做排列，即 (3 + 2)! = 5! = 120。<br>Explain: Since there are no restrictions, treat them as 5 distinct books and arrange them as 5! = 120.",
+                phoneTips: "題目寫『無任何限制』，把 5 本書一起做直線排列 (5!) 即可。 'No restrictions' means you can just treat them as 5 distinct books in a line (5!)."
+            },
+            { 
+                q_zh: "第 5 題：從 10 位學生中選出 1 位正班長與 1 位副班長，共有多少種不同的選法？",
+                q_en: "Q5: In how many ways can a president and a vice-president be chosen from 10 students?", 
+                options: { A: "90", B: "45", C: "100", D: "20" }, 
+                correct: "A",
+                explain: "解析：職位有區分（順序重要），為排列問題。第一位有 10 種，第二位剩下 9 種：P(10, 2) = 10 × 9 = 90。<br>Explain: Since roles are distinct, order matters (permutation): P(10, 2) = 10 × 9 = 90.",
+                phoneTips: "班長和副班長是『不同的職位』，順序有差，要用排列 P(10, 2)。 Roles are different, so order matters. Use permutation P(10, 2)."
+            },
+            { 
+                q_zh: "第 6 題：有 5 名男生和 5 名女生排成一列。若要求男女相間而立，共有多少種不同的排列方法？",
+                q_en: "Q6: 5 boys and 5 girls are arranged in a line. If they must alternate by gender, how many arrangements are there?", 
+                options: { A: "14,400", B: "28,800", C: "120", D: "240" }, 
+                correct: "B",
+                explain: "解析：男女相間有「男先」與「女先」2種框架。每種框架中男女各自排列為 5!。總數即為 2 × 5! × 5! = 28800。<br>Explain: Alternating has 2 cases. For each case, boys arrange in 5! and girls in 5!. Total: 2 × 5! × 5! = 28800.",
+                phoneTips: "先決定是男女相間還是女男相間（2種），男生和女生再各自排列（5! 和 5!）。 First determine the gender order (2 cases), then arrange boys (5!) and girls (5!) separately."
+            },
+            { 
+                q_zh: "第 7 題：將 5 個不同的球放進 3 個不同的盒子中，若每個盒子放球數無限制，共有多少種放球方法？",
+                q_en: "Q7: 5 distinct balls are placed into 3 distinct boxes (no limit per box). How many ways can they be placed?", 
+                options: { A: "125", B: "243", C: "15", D: "25" }, 
+                correct: "B",
+                explain: "解析：每個球有 3 個盒子可選，5 個球相乘 5 次，即 3<sup>5</sup> = 243。<br>Explain: Each of the 5 balls has 3 choices. Total ways: 3<sup>5</sup> = 243.",
+                phoneTips: "每個球有 3 個盒子可以選，有 5 個球，所以是 3 乘了 5 次 (3的5次方)。 Each ball has 3 choices. Since there are 5 balls, it is 3 to the power of 5."
+            },
+            { 
+                q_zh: "第 8 題：6 名讀者在圖書館排成一列。其中甲、乙兩人必須相鄰而坐，共有多少種不同的排列方法？",
+                q_en: "Q8: 6 readers are in a line. If Person A and Person B must sit next to each other, how many arrangements are there?", 
+                options: { A: "120", B: "240", C: "720", D: "480" }, 
+                correct: "B",
+                explain: "解析：使用綑綁法：將甲乙看作 1 個大元素，與其餘 4 人做排列 (5!)。甲乙內部可對調位置 (2!)。5! × 2! = 240。<br>Explain: Treat A and B as one item. Arrange 5 items (5!), then multiply by 2! for A & B swapping: 5! × 2! = 240.",
+                phoneTips: "『相鄰問題』必用『綑綁法』！把甲、乙綁成 1 個跟剩下 4 個人一起排 (5!)，再乘以他們互換 (2!)。 Bound A and B as one item and arrange with the other 4 (5!), then multiply by their swap (2!)."
+            },
+            { 
+                q_zh: "第 9 題：從 7 男和 5 女中選出 3 男與 2 女組成一個 5 人小組，共有多少種不同的組合方法？",
+                q_en: "Q9: How many ways can a team of 3 boys and 2 girls be chosen from 7 boys and 5 girls?", 
+                options: { A: "350", B: "120", C: "792", D: "210" }, 
+                correct: "A",
+                explain: "解析：分步進行：選男生 C(7,3) = 35 種，選女生 C(5,2) = 10 種，相乘得 35 × 10 = 350。<br>Explain: Step 1: Choose boys C(7,3) = 35. Step 2: Choose girls C(5,2) = 10. Total = 35 × 10 = 350.",
+                phoneTips: "分兩步：先從 7 男選 3 男，再從 5 女選 2 女，再把兩個組合數相乘。 Two steps: choose boys from 7, girls from 5, and multiply the two combinations."
+            },
+            { 
+                q_zh: "第 10 題：8 位嘉賓圍繞著一張圓形餐桌坐下，不考慮桌子方向，共有多少種不同的圓排列方法？",
+                q_en: "Q10: 8 guests sit around a circular table. Disregarding the table's rotation, how many arrangements are there?", 
+                options: { A: "40,320", B: "5,040", C: "362,880", D: "10,080" }, 
+                correct: "B",
+                explain: "解析：圓形排列中需固定一人，計算方法為 (8 - 1)! = 7! = 5040。<br>Explain: For circular permutation, fix one person. The calculation is (8 - 1)! = 7! = 5040.",
+                phoneTips: "圓形排列要先固定一個人，所以是 (8 - 1)! 也就是 7!。 Circular arrangement requires fixing one person, so it is (8-1)! = 7!."
+            },
+            { 
+                q_zh: "第 11 題：計算英文單字「APPLE」的所有字母進行排列，可拼出多少個不同的拼法？",
+                q_en: "Q11: How many distinct arrangements are there for the letters in the word 'APPLE'?", 
+                options: { A: "120", B: "60", C: "24", D: "30" }, 
+                correct: "B",
+                explain: "解析：含有重複字母 P (2次) 的排列。計算方法為 5! / 2! = 60。<br>Explain: Permutation with repeated items. Since 'P' repeats twice, the calculation is 5! / 2! = 60.",
+                phoneTips: "APPLE 有 5 個字母，但 P 重複了 2 次，所以用 5! 除以 2! 消除重複。 APPLE has 5 letters but 'P' repeats twice. Use 5! divided by 2! to remove duplicates."
+            },
+            { 
+                q_zh: "第 12 題：平面上有 10 個不同的點，任意三點不共線。以這些點為頂點，可畫出多少個三角形？",
+                q_en: "Q12: There are 10 distinct points on a plane, no three of which are collinear. How many triangles can be formed?", 
+                options: { A: "120", B: "720", C: "45", D: "90" }, 
+                correct: "A",
+                explain: "解析：形成一個三角形需要選 3 個點。因為不分順序，屬於組合問題：C(10, 3) = 120。<br>Explain: Choosing 3 points forms a triangle. Since order does not matter, use combination C(10, 3) = 120.",
+                phoneTips: "選 3 個點就能連成三角形。因為點的順序不影響三角形，所以是 C(10, 3)。 Selecting 3 points forms a triangle. Since order doesn't matter, it's C(10, 3)."
+            },
+            { 
+                q_zh: "第 13 題：袋中有 5 紅球和 4 藍球。取 3 球，其中「最少要有一個紅球」有多少種取法？",
+                q_en: "Q13: A bag has 5 red and 4 blue balls. If 3 are drawn, how many ways to get 'at least one red ball'?", 
+                options: { A: "84", B: "80", C: "40", D: "74" }, 
+                correct: "B",
+                explain: "解析：用總方法數 C(9,3) 減去全是藍球 C(4,3) 的情況，即 84 - 4 = 80。<br>Explain: Subtract the case of choosing only blue balls C(4,3) from the total combinations C(9,3): 84 - 4 = 80.",
+                phoneTips: "用『扣除法』！用任意取3球的總數 C(9,3) 扣除『全是藍球』C(4,3) 的方法。 Use subtraction! Subtract 'all blues' C(4,3) from the total combinations C(9,3)."
+            },
+            { 
+                q_zh: "第 14 題：將 4 名新員工分配到 3 個不同的部門，每個部門至少分配 1 人，共有多少種分配方法？",
+                q_en: "Q14: 4 new employees are assigned to 3 different departments (at least 1 per department). How many ways?", 
+                options: { A: "24", B: "81", C: "64", D: "36" }, 
+                correct: "D",
+                explain: "解析：先將 4 人分成「2, 1, 1」三組：C(4,2)/2! = 6 種。再分派至 3 個部門 (乘以 3!)：6 × 6 = 36。<br>Explain: Group 4 people into size 2, 1, 1: C(4,2)/2! = 6. Then distribute to 3 departments (× 3!): 6 × 6 = 36.",
+                phoneTips: "先分組再分配：分組人數只能是 2, 1, 1。算出分組數後，再乘上部門排列 3!。 Group first (must be sizes 2,1,1), then distribute them by multiplying by 3!."
+            },
+            { 
+                q_zh: "第 15 題：挑戰百萬：10 人排成一列。若甲、乙、丙三人「互不相鄰」，共有多少種不同的排列方法？",
+                q_en: "Q15: Millionaire Question: 10 people in a line. If A, B, and C must not stand next to each other, how many ways?", 
+                options: { A: "8! x 3!", B: "7! x P(8,3)", C: "7! x C(8,3)", D: "7! x 3! x P(8,3)" }, 
+                correct: "B",
+                explain: "解析：使用插空法。先將其餘 7 人排好 (7!)，產生 8 個空隙。再將甲乙丙放入這 8 個空隙中排列：7! × P(8, 3)。<br>Explain: Arrange the other 7 people (7!) creating 8 gaps, then arrange A, B, C into 3 of those gaps: 7! × P(8, 3).",
+                phoneTips: "最後一題！先排另外 7 個人 (7!)，這會產生 8 個空隙。再把甲乙丙放進這 8 個空隙排列，就是 P(8, 3)！ First arrange the other 7 (7!), creating 8 gaps. Then arrange A, B, C into those gaps: P(8, 3)!"
+            }
+        ];
+
+        // 關卡與分數對照表 (保留「關卡」字眼)
+        const prizeLadder = [
+            { level: 1, prize: "100", safe: false },
+            { level: 2, prize: "200", safe: false },
+            { level: 3, prize: "300", safe: false },
+            { level: 4, prize: "500", safe: false },
+            { level: 5, prize: "1,000", safe: true },
+            { level: 6, prize: "2,000", safe: false },
+            { level: 7, prize: "4,000", safe: false },
+            { level: 8, prize: "8,000", safe: false },
+            { level: 9, prize: "16,000", safe: false },
+            { level: 10, prize: "32,000", safe: true },
+            { level: 11, prize: "64,000", safe: false },
+            { level: 12, prize: "125,000", safe: false },
+            { level: 13, prize: "250,000", safe: false },
+            { level: 14, prize: "500,000", safe: false },
+            { level: 15, prize: "1,000,000", safe: true }
+        ];
+
+        let currentQuestionIndex = 0;
+        let is5050Used = false;
+        let isPhoneUsed = false;
+        let canAnswer = true;
+        let isAnswerCorrect = false;
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'correct') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.15);
+                osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.3);
+                osc.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.45);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.8);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, audioCtx.currentTime); 
+                osc.frequency.linearRampToValueAtTime(110, audioCtx.currentTime + 0.6); 
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.6);
+            } else if (type === 'click') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            } else if (type === 'victory') {
+                osc.type = 'triangle';
+                let now = audioCtx.currentTime;
+                [523, 659, 784, 1046, 784, 1046, 1318].forEach((freq, idx) => {
+                    osc.frequency.setValueAtTime(freq, now + (idx * 0.15));
+                });
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 1.5);
+                osc.start();
+                osc.stop(now + 1.5);
+            } else if (type === 'ring') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(650, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            }
+        }
+
+        // 渲染挑戰梯 (保留完整「關卡」文字，非簡寫)
+        function drawLadder() {
+            const ladderList = document.getElementById("ladder-list");
+            ladderList.innerHTML = "";
+            prizeLadder.forEach(item => {
+                const div = document.createElement("div");
+                div.id = `ladder-level-${item.level}`;
+                div.className = "ladder-item";
+                if (item.safe) div.classList.add("milestone");
+                
+                div.innerHTML = `
+                    <span>關卡 ${String(item.level).padStart(2, '0')}</span>
+                    <span>$${item.prize} 分</span>
+                `;
+                ladderList.appendChild(div);
+            });
+        }
+
+        function loadQuestion() {
+            canAnswer = true;
+            isAnswerCorrect = false;
+
+            document.getElementById("explanation-box").style.display = "none";
+
+            const currentQ = questions[currentQuestionIndex];
+            
+            // 輸出中英雙語題目 (大小同大，顏色皆白)
+            document.getElementById("question-box").innerHTML = `
+                <div class="question-text-zh">${currentQ.q_zh}</div>
+                <div class="question-text-en">${currentQ.q_en}</div>
+            `;
+
+            const options = ['A', 'B', 'C', 'D'];
+            options.forEach(opt => {
+                const btn = document.getElementById(`opt-${opt}`);
+                btn.innerText = `${opt}: ${currentQ.options[opt]}`;
+                btn.className = "option-btn";
+                btn.style.visibility = "visible";
+                btn.disabled = false;
+            });
+
+            prizeLadder.forEach(item => {
+                const element = document.getElementById(`ladder-level-${item.level}`);
+                element.className = "ladder-item";
+                if (item.safe) element.classList.add("milestone");
+                
+                if (item.level === currentQuestionIndex + 1) {
+                    element.classList.add("active");
+                } else if (item.level <= currentQuestionIndex) {
+                    element.classList.add("passed");
+                }
+            });
+
+            document.getElementById("btn-5050").disabled = is5050Used;
+            document.getElementById("btn-phone").disabled = isPhoneUsed;
+        }
+
+        function selectOption(selectedOpt) {
+            if (!canAnswer) return;
+            canAnswer = false;
+            playSound('click');
+
+            const currentQ = questions[currentQuestionIndex];
+            const selectedBtn = document.getElementById(`opt-${selectedOpt}`);
+            const correctBtn = document.getElementById(`opt-${currentQ.correct}`);
+
+            selectedBtn.classList.add("selected");
+
+            ['A', 'B', 'C', 'D'].forEach(opt => {
+                document.getElementById(`opt-${opt}`).disabled = true;
+            });
+
+            setTimeout(() => {
+                const explanationBox = document.getElementById("explanation-box");
+                const expTitle = document.getElementById("explanation-title");
+                const expContent = document.getElementById("explanation-content");
+                const nextBtn = document.getElementById("btn-next");
+
+                selectedBtn.classList.remove("selected");
+
+                if (selectedOpt === currentQ.correct) {
+                    playSound('correct');
+                    selectedBtn.classList.add("correct");
+                    isAnswerCorrect = true;
+
+                    explanationBox.className = "explanation-overlay correct-style";
+                    expTitle.innerHTML = `<span style="color: var(--correct-green); font-size: 18px;">⭕ 答對了！ Correct!</span>`;
+                    
+                    if (currentQuestionIndex === 14) {
+                        nextBtn.innerText = "完成百萬挑戰 Finish! 🏆";
+                    } else {
+                        nextBtn.innerText = "下一題 Next ➔";
+                    }
+                } else {
+                    playSound('wrong');
+                    selectedBtn.classList.add("wrong");
+                    correctBtn.classList.add("correct");
+                    isAnswerCorrect = false;
+
+                    // 答錯時顯示經典橙色的「查看挑戰結果」按鈕
+                    explanationBox.className = "explanation-overlay wrong-style";
+                    expTitle.innerHTML = `<span style="color: var(--wrong-red); font-size: 18px;">❌ 答錯了！ Correct: ${currentQ.correct}</span>`;
+                    nextBtn.innerText = "查看挑戰結果 Result ➔";
+                }
+
+                // 直接出答案，不顯示「列式結果 Equation:」
+                expContent.innerHTML = `${currentQ.explain}`;
+
+                explanationBox.style.display = "block";
+            }, 800);
+        }
+
+        function goToNextStep() {
+            playSound('click');
+            if (isAnswerCorrect) {
+                if (currentQuestionIndex === 14) {
+                    showEndOverlay(true);
+                } else {
+                    currentQuestionIndex++;
+                    loadQuestion();
+                }
+            } else {
+                showEndOverlay(false);
+            }
+        }
+
+        function use5050() {
+            if (is5050Used || !canAnswer) return;
+            playSound('click');
+            is5050Used = true;
+            document.getElementById("btn-5050").disabled = true;
+
+            const currentQ = questions[currentQuestionIndex];
+            const correctOpt = currentQ.correct;
+            const wrongOpts = ['A', 'B', 'C', 'D'].filter(opt => opt !== correctOpt);
+            
+            const shuffledWrong = wrongOpts.sort(() => 0.5 - Math.random());
+            const hideOpts = shuffledWrong.slice(0, 2);
+
+            hideOpts.forEach(opt => {
+                document.getElementById(`opt-${opt}`).style.visibility = "hidden";
+            });
+        }
+
+        function usePhone() {
+            if (isPhoneUsed || !canAnswer) return;
+            isPhoneUsed = true;
+            document.getElementById("btn-phone").disabled = true;
+
+            playSound('ring');
+            setTimeout(() => { playSound('ring'); }, 300);
+
+            setTimeout(() => {
+                const currentQ = questions[currentQuestionIndex];
+                document.getElementById("phone-message").innerText = currentQ.phoneTips;
+                document.getElementById("phone-modal").style.display = "flex";
+            }, 600);
+        }
+
+        function closePhoneModal() {
+            playSound('click');
+            document.getElementById("phone-modal").style.display = "none";
+        }
+
+        function goHome() {
+            playSound('click');
+            document.getElementById("start-overlay").classList.remove("hidden");
+            document.getElementById("end-overlay").classList.add("hidden");
+        }
+
+        function startGame() {
+            playSound('click');
+            document.getElementById("start-overlay").classList.add("hidden");
+            resetGameData();
+            loadQuestion();
+        }
+
+        function showEndOverlay(isWin) {
+            const overlay = document.getElementById("end-overlay");
+            const title = document.getElementById("end-title");
+            const message = document.getElementById("end-message");
+            overlay.classList.remove("hidden");
+
+            if (isWin) {
+                playSound('victory');
+                title.innerText = "🎉 恭喜通關！ Perfect! 🎉";
+                title.style.color = "var(--accent-cyan)";
+                message.innerHTML = `你完成了所有 15 道難關！<br>成功奪得了最高榮譽 <strong style="color: #ffa200; font-size: 24px;">1,000,000 分</strong>！`;
+            } else {
+                title.innerText = "💥 挑戰結束 Game Over 💥";
+                title.style.color = "var(--wrong-red)";
+                
+                let safetyPrize = "0";
+                if (currentQuestionIndex >= 10) {
+                    safetyPrize = "32,000";
+                } else if (currentQuestionIndex >= 5) {
+                    safetyPrize = "1,000";
+                }
+
+                message.innerHTML = `很遺憾，你在第 ${currentQuestionIndex + 1} 題挑戰失敗。<br>帶走安全保障分數：<strong style="color: #ffa200; font-size: 22px;">${safetyPrize} 分</strong>！`;
+            }
+        }
+
+        function resetGameData() {
+            currentQuestionIndex = 0;
+            is5050Used = false;
+            isPhoneUsed = false;
+        }
+
+        function resetGame() {
+            playSound('click');
+            document.getElementById("end-overlay").classList.add("hidden");
+            resetGameData();
+            loadQuestion();
+        }
+
+        window.onload = () => {
+            drawLadder();
+        };
+    </script>
+</body>
+</html>
