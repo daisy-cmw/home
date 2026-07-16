@@ -18,7 +18,7 @@
             scroll-behavior: smooth; /* 啟用平滑捲動效果 */
         }
 
-        /* 主容器：拉寬最大寬度，更適合平板與電腦展示 */
+        /* 主容器：拉寬最大寬度，電腦平板視覺更和諧 */
         .container {
             max-width: 1050px;
             width: 100%;
@@ -74,7 +74,7 @@
             margin-bottom: 20px;
             display: flex;
             align-items: center;
-            scroll-margin-top: 40px; /* 捲動到目標時，頂部留點呼吸空間，不會貼太緊 */
+            scroll-margin-top: 40px; /* 捲動到目標時，頂部留點呼吸空間 */
         }
 
         /* 加上年級專屬的小裝飾 */
@@ -94,14 +94,14 @@
             gap: 20px;
         }
 
-        /* 針對 iPad / 平板 */
+        /* 針對 iPad / 平板（螢幕寬度小於 900px）改為 2 欄 */
         @media (max-width: 900px) {
             ol {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
 
-        /* 針對 手機 */
+        /* 針對 手機（螢幕寬度小於 600px）改為 1 欄 */
         @media (max-width: 600px) {
             ol {
                 grid-template-columns: 1fr;
@@ -211,7 +211,7 @@
 
     <h3 id="s6-section">S.6 Chapter 3 More about Graphs of Functions</h3>
     <ol>
-        <li><a href="graphdance.html">Math Dance 數學舞蹈家</a></li>
+        <li><a href="graphdance.html">數學舞蹈家 Math Dance</a></li>
         <li><a href="TwoTransformation.html">Two Transformation Exercise</a></li>
         <li><a href="Transformation-DSE-Long-Questions.html">Transformation - DSE Long Questions</a></li>
         <li><a onclick="checkQuizPassword()">Transformation - Quiz</a></li>
@@ -221,7 +221,7 @@
 <div class="footer">
     <p>© 2026 Miss Chow's Math Room. All rights reserved.</p>
     <div class="counter-img">
-        <img src="https://img.shields.io/badge/dynamic/json?label=Visitors&query=%24.value&url=https%3A%2F%2Fapi.countapi.xyz%2Fhit%2Fdaisy-cmw-mathsite%2Fvisits&color=1a4f43&style=flat-square" onerror="this.src='https://img.shields.io/badge/Visitors-Welcome-1a4f43?style=flat-square'" alt="Visitor Count" />
+        <img src="https://komarev.com/ghpvc/?username=daisy-cmw-mathsite&color=1a4f43&label=Visitors&style=flat-square" alt="Visitor Count" />
     </div>
 </div>
 
