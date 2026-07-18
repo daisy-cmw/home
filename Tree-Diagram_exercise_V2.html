@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>機率樹狀圖解題器 (Probability Tree Diagram Solver</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; max-width: 1500px; margin: 0 auto; padding: 15px; background-color: #f8fafc; color: #1e293b; font-size: 14px; }
+    .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 15px; }
+    h2, h3, h4 { color: #0f172a; margin-top: 0; margin-bottom: 10px; }
+    hr { border: 0; height: 1px; background: #e2e8f0; margin: 15px 0; }
+    
+    /* 控制面板佈局 */
+    .grid-config { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; }
+    .input-group { margin-bottom: 10px; }
+    label { display: block; font-weight: 600; margin-bottom: 6px; color: #334155; }
+    .input-group input[type="text"], select { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+    .input-group input[type="text"]:focus, select:focus { border-color: #0284c7; outline: none; box-shadow: 0 0 0 3px rgba(2,132,199,0.1); }
+    
+    .radio-group { display: flex; gap: 15px; margin-top: 6px; }
+    .radio-label { display: flex; align-items: center; gap: 4px; font-weight: 500; cursor: pointer; }
+    
+    /* 按鈕 */
+    .btn-container { display: flex; gap: 10px; margin-top: 10px; }
+    .btn-hint { background-color: #d97706; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .btn-hint:hover { background-color: #b45309; }
+    .btn-reset { background-color: #ef4444; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .btn-reset:hover { background-color: #dc2626; }
+    
+    /* 歷程紀錄追蹤格樣式 */
+    .history-log-container { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .history-log-title { font-weight: bold; color: #475569; font-size: 13px; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .history-log-box { height: 44px; overflow-y: auto; font-size: 13px; line-height: 22px; color: #0f172a; font-family: monospace, system-ui; background: #f8fafc; padding: 4px 10px; border-radius: 6px; border: 1px solid #cbd5e1; scroll-behavior: smooth; }
+    .history-log-box div { border-bottom: 1px dashed #f1f5f9; padding: 2px 0; }
+    .history-log-box div:last-child { border-bottom: none; color: #0284c7; font-weight: 600; }
+    
+    /* 雙視窗並排佈局 */
+    .tree-display-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+    .tree-display-grid.twins { grid-template-columns: repeat(2, 1fr); }
+    
+    .tree-view-box { background: white; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; position: relative; overflow-x: auto; }
+    
+    /* SVG 畫布型動態樹狀圖核心 */
+    .tree-render-container { position: relative; height: auto; }
+    .tree-svg-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+    
+    /* 節點基礎樣式 */
+    .absolute-node { position: absolute; transform: translate(-50%, -50%); z-index: 10; text-align: center; transition: background-color 0.25s, border-color 0.25s; }
+    .node-start { background: #f1f5f9; border: 2px solid #cbd5e1; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #475569; font-size: 13px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .node-internal { background: #eef2ff; border: 1px solid #818cf8; border-radius: 6px; padding: 5px 10px; color: #312e81; font-weight: 500; font-size: 13px; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.02); min-width: 50px; }
+    
+    /* 右側結果綠色框 */
+    .node-leaf { background: #f0fdf4; border: 1px solid #22c55e; border-radius: 6px; padding: 5px 10px; color: #14532d; font-size: 12px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); width: fit-content; white-space: nowrap; transform: translate(0%, -50%); display: inline-flex; flex-direction: column; align-items: center; }
+    .node-leaf .outcome-title { font-weight: bold; margin-bottom: 4px; color: #166534; display: block; }
+    
+    /* 線條上的精緻迷你小格子 */
+    .absolute-line-input { position: absolute; transform: translate(-50%, -50%); z-index: 20; }
+    .prob-input { width: 42px !important; padding: 2px 0 !important; border: 1px solid #cbd5e1 !important; border-radius: 4px !important; text-align: center !important; font-size: 11px !important; font-weight: 500 !important; background: white !important; box-sizing: border-box !important; display: inline-block !important; height: 22px !important; }
+    .prob-input:focus { border-color: #0284c7 !important; outline: none !important; box-shadow: 0 0 0 2px rgba(2,132,199,0.2) !important; }
+    .prob-input::placeholder { color: #94a3b8; font-weight: bold; }
+    
+    /* 狀態控制與高亮樣式 */
+    .auto-filled { background-color: #f0fdf4 !important; border-color: #bbf7d0 !important; color: #166534 !important; font-weight: bold !important; }
+    .highlight-input { border: 2px solid #f59e0b !important; background-color: #fffde6 !important; animation: pulse 2s infinite; }
+    
+    /* 原版整條路徑變黃色 */
+    .highlight-node { background-color: #fffbeb !important; border: 2px solid #f59e0b !important; color: #b45309 !important; font-weight: bold !important; }
+    .highlight-node .outcome-title { color: #b45309 !important; }
+    
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(245,158,11,0.4); } 70% { box-shadow: 0 0 0 5px rgba(245,158,11,0); } 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); } }
+  </style>
+</head>
+<body>
+
+  <!-- 控制面板 -->
+  <div class="card">
+    <h2>🌳 機率樹狀圖解題器 (Probability Tree Diagram Solver</h2>
+    <hr>
+    
+    <div class="grid-config">
+      <div class="input-group">
+        <label for="layer-count">層數 (Number of Layers):</label>
+        <select id="layer-count" onchange="initApp()">
+          <option value="1">1 Layer</option>
+          <option value="2" selected>2 Layers</option>
+          <option value="3">3 Layers</option>
+          <option value="4">4 Layers</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>開啟樹狀圖 2 作比較？(Enable Tree 2 for comparison?)</label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="layer-swap" value="no" checked onchange="toggleSwapMode()"> 否 (No)
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="layer-swap" value="yes" onchange="toggleSwapMode()"> 是 (Yes)
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div id="options-input-container" class="input-group" style="margin-top: 12px;"></div>
+    <div id="tree2-order-container" style="margin-top: 12px; padding: 10px; background: #fffbeb; border: 1px dashed #f59e0b; border-radius: 8px; display: none;"></div>
+    
+    <div class="btn-container">
+      <button id="btn-hint" class="btn-hint" onclick="toggleHintMode()">💡 提示 (Hint)</button>
+      <button class="btn-reset" onclick="resetProbabilities()">重設 (Reset)</button>
+    </div>
+  </div>
+
+  <!-- 歷程紀錄追蹤格 -->
+  <div class="history-log-container">
+    <div class="history-log-title">📝 輸入歷程追蹤 (Input History Tracking):</div>
+    <div id="history-log-box" class="history-log-box">
+      <span style="color:#94a3b8; font-style:italic;">暫無輸入紀錄 (No input history yet)</span>
+    </div>
+  </div>
+
+  <!-- 提示訊息位置 -->
+  <p style="color: #0284c7; margin: 5px 0 15px 4px; font-weight: 500; font-size: 0.95em;">💡 提示：請根據題目，輸入已知的數值，未知數亦可輸入 [如：P(B | A) = 0.2 P(A)，可輸入  P(A) = a，P(B | A) = 0.2a。]。</p>
+
+  <!-- 互動樹狀圖顯示區 -->
+  <div id="tree-display-wrapper" class="tree-display-grid">
+    <!-- 樹狀圖 1 -->
+    <div class="tree-view-box">
+      <h3 id="tree1-title" style="color: #0284c7; margin-bottom: 15px;">🌲 樹狀圖 1 (Tree Diagram 1)</h3>
+      <div id="tree1-engine-container" class="tree-render-container"></div>
+    </div>
+    
+    <!-- 樹狀圖 2 -->
+    <div class="tree-view-box" id="tree2-box" style="display: none;">
+      <h3 id="tree2-title" style="color: #b45309; margin-bottom: 15px;">🌲 樹狀圖 2 (Tree Diagram 2)</h3>
+      <div id="tree2-engine-container" class="tree-render-container"></div>
+    </div>
+  </div>
+
+  <script>
+    let inputsState = {}; 
+    let jointState = {};  
+    let jointInputSource = {}; // 新增：追蹤交集機率是從哪一個輸入框手動輸入的
+    let autoFilledFlags = {}; 
+    let isHintActive = false;
+    let historyLogs = []; 
+
+    const defaultOptions = [
+      "A, A'",
+      "B, B'",
+      "C, C'",
+      "X, Y"
+    ];
+
+    function initApp() {
+      const layerCount = parseInt(document.getElementById('layer-count').value);
+      const container = document.getElementById('options-input-container');
+      
+      let html = `<h4 style="margin-bottom: 8px; color: #475569;">各層標籤 (Layer Labels):</h4><div class="grid-config">`;
+      for (let i = 1; i <= layerCount; i++) {
+        const val = defaultOptions[i-1] || `A, B`;
+        html += `
+          <div class="input-group">
+            <label>第 ${i} 層 (Layer ${i}):</label>
+            <input type="text" id="layer-opt-${i}" value="${val}" onchange="updateTree2OrderUI()">
+          </div>
+        `;
+      }
+      html += `</div>`;
+      container.innerHTML = html;
+
+      inputsState = {};
+      jointState = {};
+      jointInputSource = {};
+      autoFilledFlags = {};
+      historyLogs = [];
+      renderLogBox();
+      updateTree2OrderUI();
+    }
+
+    function toggleSwapMode() {
+      const isSwap = document.querySelector('input[name="layer-swap"]:checked').value === 'yes';
+      document.getElementById('tree2-box').style.display = isSwap ? 'block' : 'none';
+      document.getElementById('tree2-order-container').style.display = isSwap ? 'block' : 'none';
+      document.getElementById('tree-display-wrapper').className = isSwap ? 'tree-display-grid twins' : 'tree-display-grid';
+      updateTree2OrderUI();
+    }
+
+    function updateTree2OrderUI() {
+      const layerCount = parseInt(document.getElementById('layer-count').value);
+      const isSwap = document.querySelector('input[name="layer-swap"]:checked').value === 'yes';
+      const container = document.getElementById('tree2-order-container');
+      
+      if (!isSwap) { generateTrees(); return; }
+      
+      let existingSelections = [];
+      for (let i = 0; i < layerCount; i++) {
+        const el = document.getElementById(`tree2-pos-${i}`);
+        if (el) existingSelections.push(el.value);
+      }
+      
+      let html = `<h4 style="margin-bottom: 6px; color: #b45309;">🔄 樹狀圖 2 層級 (Tree 2 Layers):</h4><div style="display:flex; gap:15px; flex-wrap:wrap;">`;
+      for (let i = 0; i < layerCount; i++) {
+        let currentSel = existingSelections[i] !== undefined ? parseInt(existingSelections[i]) : (layerCount - 1 - i);
+        html += `
+          <div style="display:flex; align-items:center; gap:5px;">
+            <label style="margin-bottom:0; font-size:13px; font-weight:normal;">第 ${i+1} 層 (Layer ${i+1}):</label>
+            <select id="tree2-pos-${i}" onchange="generateTrees()" style="width:auto; padding:4px 6px; font-size:13px;">
+        `;
+        for (let j = 0; j < layerCount; j++) {
+          const rawText = document.getElementById(`layer-opt-${j+1}`)?.value || `選項 ${j+1}`;
+          const firstOpt = rawText.split(',')[0].trim();
+          html += `<option value="${j}" ${j === currentSel ? 'selected' : ''}>原第 ${j+1} 層 (${firstOpt})</option>`;
+        }
+        html += `</select></div>`;
+      }
+      html += `</div>`;
+      container.innerHTML = html;
+      
+      generateTrees();
+    }
+
+    function getLayersData(isTree2 = false) {
+      const layerCount = parseInt(document.getElementById('layer-count').value);
+      let originalLayers = [];
+      for (let i = 1; i <= layerCount; i++) {
+        const raw = document.getElementById(`layer-opt-${i}`).value;
+        const opts = raw.split(',').map(s => s.trim()).filter(s => s !== '');
+        if (opts.length > 0) originalLayers.push(opts);
+      }
+      if (!isTree2) return originalLayers;
+
+      let arrangedLayers = [];
+      for (let i = 0; i < layerCount; i++) {
+        const selectEl = document.getElementById(`tree2-pos-${i}`);
+        const sourceIdx = selectEl ? parseInt(selectEl.value) : (layerCount - 1 - i);
+        if (originalLayers[sourceIdx]) arrangedLayers.push(originalLayers[sourceIdx]);
+      }
+      return arrangedLayers;
+    }
+
+    function toggleHintMode() {
+      isHintActive = !isHintActive;
+      const btn = document.getElementById('btn-hint');
+      btn.innerText = isHintActive ? "⭐ 隱藏提示 (Hide Hint)" : "💡 提示 (Hint)";
+      btn.style.backgroundColor = isHintActive ? "#eab308" : "#d97706";
+      btn.style.color = isHintActive ? "#0f172a" : "white";
+      generateTrees();
+    }
+
+    function analyzeValue(val) {
+      if (!val || val.trim() === "" || val.trim() === "?") return "empty";
+      return /[a-zA-Z]/.test(val) ? "variable" : "numeric";
+    }
+
+    function checkProbabilityValid(val) {
+      val = val.trim();
+      if (!val || val === "?" || val === "") return true;
+      if (/[a-zA-Z]/.test(val)) return true;
+      
+      if (/^\d+\/\d+$/.test(val)) {
+        let parts = val.split('/');
+        let num = parseFloat(parts[0]);
+        let den = parseFloat(parts[1]);
+        if (den === 0) return false;
+        let res = num / den;
+        return (res >= 0 && res <= 1);
+      }
+      if (/^\d+(\.\d+)?$/.test(val)) {
+        let res = parseFloat(val);
+        return (res >= 0 && res <= 1);
+      }
+      return false; 
+    }
+
+    function getComplement(val) {
+      val = val.trim();
+      if (!val) return "";
+      if (/^\d+(\.\d+)?$/.test(val)) {
+        let num = parseFloat(val);
+        if (num >= 0 && num <= 1) return parseFloat((1 - num).toFixed(4)).toString();
+      }
+      if (/^\d+\/\d+$/.test(val)) {
+        let parts = val.split('/');
+        let num = parseInt(parts[0]), den = parseInt(parts[1]);
+        if (den > 0 && num <= den) return `${den - num}/${den}`;
+      }
+      return `1 - ${val}`;
+    }
+
+    function getHintAnalysis() {
+      let highlights = { inputs: new Set(), paths: new Set(), nodes: new Set() };
+      if (!isHintActive) return highlights;
+
+      function checkTreeHints(treeId, layers) {
+        function recurse(layerIdx, currentPath, branchInputKeys) {
+          if (layerIdx >= layers.length) {
+            const sortedKey = [...currentPath].sort().join('__');
+            const jointInputId = `joint_${treeId}_${sortedKey}`;
+            
+            // 收集此完整路徑上的所有輸入數值/表達式
+            let branchValues = [];
+            branchInputKeys.forEach(k => {
+              branchValues.push({ id: `input_${k}`, val: inputsState[k] || "" });
+            });
+            branchValues.push({ id: jointInputId, val: jointState[sortedKey] || "" });
+
+            let uniqueVars = new Set();
+            let emptyCount = 0;
+
+            // 智能分析：提取未知代數變數與空白框數量
+            branchValues.forEach(item => {
+              let v = item.val.trim();
+              if (v === "" || v === "?") {
+                emptyCount++;
+              } else {
+                // 利用正規表達式抓取字母與其可能帶有的單引號（如 a', b, x''）
+                let matches = v.match(/[a-zA-Z]'*/g);
+                if (matches) {
+                  matches.forEach(variable => uniqueVars.add(variable));
+                }
+              }
+            });
+
+            // 總未知元素種類 = 獨特的變數種類 + 全空的輸入框
+            let totalUnknowns = uniqueVars.size + emptyCount;
+
+            // 🎯 核心修正點 2：只要整條路徑上「總共只有 1 種未知元素」，即為可解方程
+            if (totalUnknowns === 1) {
+              branchValues.forEach(item => {
+                let v = item.val.trim();
+                if (v === "" || v === "?" || (v.match(/[a-zA-Z]'*/g))) {
+                  highlights.inputs.add(item.id);
+                }
+              });
+
+              // 點亮整條路徑的線段與節點
+              branchInputKeys.forEach(k => highlights.paths.add(k));
+              highlights.paths.add(jointInputId);
+              
+              highlights.nodes.add(`${treeId}_root`);
+              let pathAccumulator = [];
+              currentPath.forEach(opt => {
+                pathAccumulator.push(opt);
+                highlights.nodes.add(`${treeId}_${pathAccumulator.join('->')}`);
+              });
+              highlights.nodes.add(`${treeId}_leaf->${currentPath.join('->')}`);
+            }
+            return;
+          }
+          layers[layerIdx].forEach(opt => {
+            recurse(layerIdx + 1, [...currentPath, opt], [...branchInputKeys, `${treeId}_${[...currentPath, opt].join('->')}`]);
+          });
+        }
+        recurse(0, [], []);
+      }
+
+      checkTreeHints('tree1', getLayersData(false));
+      if (document.querySelector('input[name="layer-swap"]:checked').value === 'yes') {
+        checkTreeHints('tree2', getLayersData(true));
+      }
+      return highlights;
+    }
+
+    function getDeltaX(totalLayers) {
+      if (totalLayers === 1) return 200;
+      if (totalLayers === 2) return 140;
+      if (totalLayers === 3) return 100;
+      return 80; 
+    }
+
+    function generateTrees() {
+      const activeId = document.activeElement ? document.activeElement.id : null;
+      const selStart = document.activeElement ? document.activeElement.selectionStart : null;
+      const selEnd = document.activeElement ? document.activeElement.selectionEnd : null;
+
+      const layers1 = getLayersData(false);
+      const layers2 = getLayersData(true);
+      const isSwap = document.querySelector('input[name="layer-swap"]:checked').value === 'yes';
+
+      document.getElementById('tree1-title').innerText = `🌲 樹狀圖 1 (Tree Diagram 1): ${layers1.map(l => l[0]).join(' → ')}`;
+      if (isSwap) document.getElementById('tree2-title').innerText = `🌲 樹狀圖 2 (Tree Diagram 2): ${layers2.map(l => l[0]).join(' → ')}`;
+
+      const hints = getHintAnalysis();
+
+      renderCanvasTree('tree1', layers1, hints);
+      if (isSwap) {
+        renderCanvasTree('tree2', layers2, hints);
+      }
+
+      if (activeId) {
+        const el = document.getElementById(activeId);
+        if (el) {
+          el.focus();
+          if (selStart !== null && selEnd !== null && el.setSelectionRange) {
+            el.setSelectionRange(selStart, selEnd);
+          }
+        }
+      }
+    }
+
+    function renderCanvasTree(treeId, layers, hints) {
+      const container = document.getElementById(`${treeId}-engine-container`);
+      let treeNodes = {};
+      let treeEdges = [];
+      let leafCount = 0;
+
+      function buildStructureData(layerIdx, currentPath, parentKey) {
+        const key = currentPath.length === 0 ? 'root' : currentPath.join('->');
+        
+        treeNodes[key] = { 
+          type: currentPath.length === 0 ? 'root' : 'node', 
+          label: currentPath[currentPath.length - 1] || '開始', 
+          children: [] 
+        };
+        
+        if (parentKey) {
+          treeEdges.push({ from: parentKey, to: key, inputKey: `${treeId}_${currentPath.join('->')}` });
+        }
+        
+        if (layerIdx < layers.length) {
+          layers[layerIdx].forEach(opt => {
+            const nextPath = [...currentPath, opt];
+            const nextKey = nextPath.join('->');
+            treeNodes[key].children.push(nextKey);
+            buildStructureData(layerIdx + 1, nextPath, key);
+          });
+        } else {
+          const leafKey = `leaf->${key}`;
+          treeNodes[leafKey] = { type: 'leaf', path: currentPath, leafIdx: leafCount };
+          leafCount++;
+          treeNodes[key].children.push(leafKey);
+          treeEdges.push({ from: key, to: leafKey, inputKey: `joint_${treeId}_${[...currentPath].sort().join('__')}` });
+        }
+      }
+
+      buildStructureData(0, [], null);
+
+      const deltaX = getDeltaX(layers.length);
+      const rowHeight = 65;
+      const topPadding = 35;
+      const leftOffset = 30;
+
+      function computeCoordinates(key, layerIdx) {
+        let node = treeNodes[key];
+        node.x = leftOffset + layerIdx * deltaX;
+        
+        if (node.type === 'leaf') {
+          node.y = topPadding + node.leafIdx * rowHeight;
+          return node.y;
+        }
+        
+        let sumY = 0;
+        node.children.forEach(childKey => {
+          sumY += computeCoordinates(childKey, layerIdx + 1);
+        });
+        node.y = sumY / node.children.length;
+        return node.y;
+      }
+
+      computeCoordinates('root', 0);
+
+      const requiredWidth = leftOffset + (layers.length * deltaX) + 180;
+      container.style.width = `${requiredWidth}px`;
+      container.style.height = `${topPadding + leafCount * rowHeight + 15}px`;
+
+      let svgHtml = `<svg class="tree-svg-canvas">`;
+      let domHtml = ``;
+
+      treeEdges.forEach(edge => {
+        const fromNode = treeNodes[edge.from];
+        const toNode = treeNodes[edge.to];
+        
+        let targetX = toNode.x;
+        if (toNode.type === 'leaf') targetX = toNode.x - 5;
+
+        const isPathHi = hints.paths.has(edge.inputKey);
+        const strokeColor = isPathHi ? '#f59e0b' : '#cbd5e1';
+        const strokeWidth = isPathHi ? '3.5' : '2';
+
+        svgHtml += `<line x1="${fromNode.x}" y1="${fromNode.y}" x2="${targetX}" y2="${toNode.y}" stroke="${strokeColor}" stroke-width="${strokeWidth}" stroke-linecap="round" />`;
+
+        const midX = (fromNode.x + targetX) / 2;
+        const midY = (fromNode.y + toNode.y) / 2;
+
+        if (toNode.type !== 'leaf') {
+          const val = inputsState[edge.inputKey] || "";
+          const isAuto = autoFilledFlags[edge.inputKey] ? "auto-filled" : "";
+          const readonlyAttr = autoFilledFlags[edge.inputKey] ? "readonly" : "";
+          const isInputHi = hints.inputs.has(`input_${edge.inputKey}`) ? "highlight-input" : "";
+
+          const safeParentPath = (edge.from === 'root' ? '' : edge.from).replace(/'/g, "\\'");
+          const safeLabel = toNode.label.replace(/'/g, "\\'");
+
+          domHtml += `
+            <div class="absolute-line-input" style="left: ${midX}px; top: ${midY}px;">
+              <input type="text" class="prob-input ${isAuto} ${isInputHi}" id="input_${edge.inputKey}" value="${val}" ${readonlyAttr} placeholder="?" 
+                onchange="uiChangeConditional('${treeId}', '${safeParentPath}', '${safeLabel}', this.value)">
+            </div>
+          `;
+        }
+      });
+      svgHtml += `</svg>`;
+
+      Object.keys(treeNodes).forEach(key => {
+        const node = treeNodes[key];
+        const isNodeHighlighted = hints.nodes.has(`${treeId}_${key}`) ? "highlight-node" : "";
+
+        if (node.type === 'root') {
+          domHtml += `<div class="absolute-node node-start ${isNodeHighlighted}" style="left: ${node.x}px; top: ${node.y}px;">開始</div>`;
+        } else if (node.type === 'node') {
+          domHtml += `<div class="absolute-node node-internal ${isNodeHighlighted}" style="left: ${node.x}px; top: ${node.y}px;">${node.label}</div>`;
+        } else if (node.type === 'leaf') {
+          const sortedKey = [...node.path].sort().join('__');
+          const currentJointVal = jointState[sortedKey] || "";
+          const jointInputId = `joint_${treeId}_${sortedKey}`;
+          
+          // 🎯 核心修正點 1：如果是被同步過來的另一棵樹欄位，對其加上自動填充綠框(auto-filled)與鎖定(readonly)
+          let isJointAuto = false;
+          let jointReadonly = "";
+          if (currentJointVal && jointInputSource[sortedKey] && jointInputSource[sortedKey] !== jointInputId) {
+            isJointAuto = true;
+            jointReadonly = "readonly";
+          }
+          
+          const jointAutoClass = isJointAuto ? "auto-filled" : "";
+          const isInputHi = hints.inputs.has(jointInputId) ? "highlight-input" : "";
+
+          const safeSortedKey = sortedKey.replace(/'/g, "\\'");
+          const safeJointInputId = jointInputId.replace(/'/g, "\\'");
+
+          domHtml += `
+            <div class="absolute-node node-leaf ${isNodeHighlighted}" style="left: ${node.x}px; top: ${node.y}px;">
+              <span class="outcome-title">[${node.path.join(' and ')}]</span>
+              <div>P = <input type="text" class="prob-input ${jointAutoClass} ${isInputHi}" data-joint-key="${sortedKey}" id="${jointInputId}" value="${currentJointVal}" ${jointReadonly} placeholder="?" 
+                onchange="uiChangeJoint('${safeSortedKey}', this.value, '${safeJointInputId}')"></div>
+            </div>
+          `;
+        }
+      });
+
+      container.innerHTML = svgHtml + domHtml;
+    }
+
+    function uiChangeConditional(treeId, parentPath, currentOpt, value) {
+      const currentPathKey = parentPath === "" ? currentOpt : `${parentPath}->${currentOpt}`;
+      const targetInputKey = `${treeId}_${currentPathKey}`;
+
+      if (value.trim() === "" || value.trim() === "?") {
+        inputsState[targetInputKey] = "";
+        delete autoFilledFlags[targetInputKey];
+        clearSiblingIfAuto(treeId, parentPath, currentOpt);
+        generateTrees();
+        return;
+      }
+
+      if (!checkProbabilityValid(value)) {
+        alert("0 < 機率 < 1");
+        inputsState[targetInputKey] = "";
+        clearSiblingIfAuto(treeId, parentPath, currentOpt);
+        generateTrees();
+        return;
+      }
+
+      inputsState[targetInputKey] = value;
+      delete autoFilledFlags[targetInputKey];
+
+      const layers = (treeId === 'tree1') ? getLayersData(false) : getLayersData(true);
+      const currentLayerIdx = parentPath === "" ? 0 : parentPath.split('->').length;
+      const currentOptions = layers[currentLayerIdx];
+
+      if (currentOptions && currentOptions.length === 2) {
+        const siblingOpt = currentOptions.find(o => o !== currentOpt);
+        const siblingPathKey = parentPath === "" ? siblingOpt : `${parentPath}->${siblingOpt}`;
+        const siblingInputKey = `${treeId}_${siblingPathKey}`;
+
+        inputsState[siblingInputKey] = getComplement(value);
+        autoFilledFlags[siblingInputKey] = true;
+      }
+
+      const treeLabel = treeId === 'tree1' ? '樹1' : '樹2';
+      let logText = "";
+      if (parentPath === "") {
+        logText = `[${treeLabel}] P(${currentOpt}) = ${value}`;
+      } else {
+        let condition = parentPath.split('->').join(' ∩ ');
+        logText = `[${treeLabel}] P(${currentOpt} | ${condition}) = ${value}`;
+      }
+      addHistoryLog(logText);
+
+      generateTrees();
+    }
+
+    function clearSiblingIfAuto(treeId, parentPath, currentOpt) {
+      const layers = (treeId === 'tree1') ? getLayersData(false) : getLayersData(true);
+      const currentLayerIdx = parentPath === "" ? 0 : parentPath.split('->').length;
+      const currentOptions = layers[currentLayerIdx];
+      if (currentOptions && currentOptions.length === 2) {
+        const siblingOpt = currentOptions.find(o => o !== currentOpt);
+        const siblingPathKey = parentPath === "" ? siblingOpt : `${parentPath}->${siblingOpt}`;
+        const siblingInputKey = `${treeId}_${siblingPathKey}`;
+        if (autoFilledFlags[siblingInputKey]) {
+          inputsState[siblingInputKey] = "";
+          delete autoFilledFlags[siblingInputKey];
+        }
+      }
+    }
+
+    function uiChangeJoint(sortedKey, value, sourceId) {
+      if (value.trim() === "" || value.trim() === "?") {
+        jointState[sortedKey] = "";
+        delete jointInputSource[sortedKey]; // 清空時移除來源標記
+        generateTrees();
+        return;
+      }
+
+      if (!checkProbabilityValid(value)) {
+        alert("0 < 機率 < 1");
+        jointState[sortedKey] = "";
+        generateTrees();
+        return;
+      }
+
+      jointState[sortedKey] = value;
+      jointInputSource[sortedKey] = sourceId; // 記錄本次手動输入的格子ID
+
+      let events = sortedKey.split('__').join(' ∩ ');
+      addHistoryLog(`P(${events}) = ${value}`);
+      generateTrees();
+    }
+
+    function addHistoryLog(text) {
+      historyLogs.push(text);
+      renderLogBox();
+    }
+
+    function renderLogBox() {
+      const box = document.getElementById('history-log-box');
+      if (!box) return;
+      if (historyLogs.length === 0) {
+        box.innerHTML = `<span style="color:#94a3b8; font-style:italic;">暫無輸入紀錄 (No input history yet)</span>`;
+        return;
+      }
+      box.innerHTML = historyLogs.map(log => `<div>${log}</div>`).join('');
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function resetProbabilities() {
+      inputsState = {};
+      jointState = {};
+      jointInputSource = {};
+      autoFilledFlags = {};
+      historyLogs = [];
+      renderLogBox();
+      generateTrees();
+    }
+
+    window.onload = function() { initApp(); };
+  </script>
+</body>
+</html>

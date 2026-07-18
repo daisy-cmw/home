@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>機率樹狀圖解題器 Probability Tree Diagram Solver</title>
+  <!-- 引入 Mermaid.js 用於渲染樹狀圖 -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; max-width: 1400px; margin: 0 auto; padding: 20px; background-color: #f8fafc; color: #1e293b; }
+    .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    h2, h3, h4 { color: #0f172a; margin-top: 0; }
+    hr { border: 0; height: 1px; background: #e2e8f0; margin: 20px 0; }
+    
+    /* 表單佈局 */
+    .grid-config { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .input-group { margin-bottom: 15px; }
+    label { display: block; font-weight: 600; margin-bottom: 8px; color: #334155; }
+    input[type="text"], select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
+    input[type="text"]:focus, select:focus { border-color: #0284c7; outline: none; box-shadow: 0 0 0 3px rgba(2,132,199,0.1); }
+    
+    .radio-group { display: flex; gap: 20px; margin-top: 8px; }
+    .radio-label { display: flex; align-items: center; gap: 6px; font-weight: 500; cursor: pointer; }
+    
+    /* 按鈕樣式 */
+    .btn-container { display: flex; gap: 12px; margin-top: 15px; align-items: center; flex-wrap: wrap; }
+    .btn-hint { background-color: #d97706; color: white; padding: 10px 22px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .btn-hint:hover { background-color: #b45309; }
+    .btn-reset { background-color: #ef4444; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 15px; }
+    .btn-reset:hover { background-color: #dc2626; }
+    
+    /* 機率填寫工作區 */
+    .workspace-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    .workspace-grid.twins { grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); }
+    .prob-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .prob-table th, .prob-table td { padding: 10px; border: 1px solid #e2e8f0; text-align: left; transition: background-color 0.2s; }
+    .prob-table th { background-color: #f1f5f9; font-weight: 600; }
+    
+    /* 調整欄位比例與縮短輸入框 */
+    .prob-table th:nth-child(1), .prob-table td:nth-child(1) { width: 75%; }
+    .prob-table th:nth-child(2), .prob-table td:nth-child(2) { width: 25%; text-align: center; }
+    
+    .prob-input { width: 120px; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; font-size: 14px; background-color: white; text-align: center; }
+    .auto-filled { background-color: #f0fdf4; border-color: #bbf7d0 !important; color: #166534; font-weight: bold; }
+    
+    /* 樹狀圖顯示區 */
+    .tree-container-wrapper { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    .tree-container-wrapper.twins { grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); }
+    .tree-box { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; overflow-x: auto; min-height: 300px; }
+    .mermaid { width: 100%; text-align: left; }
+  </style>
+</head>
+<body>
+
+  <!-- 控制面板 -->
+  <div class="card">
+    <h2>🌳 機率樹狀圖解題器 (Probability Tree Diagram Solver)</h2>
+    <hr>
+    
+    <div class="grid-config">
+      <div class="input-group">
+        <label for="layer-count">層數 (Number of Layers):</label>
+        <select id="layer-count" onchange="initApp()">
+          <option value="1">1 Layer</option>
+          <option value="2" selected>2 Layers</option>
+          <option value="3">3 Layers</option>
+          <option value="4">4 Layers</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>開啟樹狀圖 2 作比較？(Enable Tree 2 for comparison?)</label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="layer-swap" value="no" checked onchange="toggleSwapMode()"> 否 (No)
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="layer-swap" value="yes" onchange="toggleSwapMode()"> 是 (Yes)
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 動態生成選項輸入欄位 -->
+    <div id="options-input-container" style="margin-top: 15px;"></div>
+    
+    <!-- 自訂第二個樹狀圖層序的選單 -->
+    <div id="tree2-order-container" style="margin-top: 15px; padding: 10px; background: #fffbeb; border: 1px dashed #f59e0b; border-radius: 8px; display: none;"></div>
+    
+    <div class="btn-container">
+      <button id="btn-hint" class="btn-hint" onclick="toggleHintMode()">💡 提示 (Hint)</button>
+      <button class="btn-reset" onclick="resetProbabilities()">重設 (Reset)</button>
+    </div>
+  </div>
+
+  <!-- 工作區 -->
+  <div class="card">
+    <h3>📝 機率填寫區 (Probability Inputs)</h3>
+    <p style="color: #0284c7; margin-top: -10px; font-weight: 500; font-size: 0.95em;">💡 提示：請根據題目，輸入已知的數值，未知數亦可輸入 [如：P(B | A) = 0.2 P(A)，可輸入  P(A) = a，P(B | A) = 0.2a。]</p>
+    
+    <div id="workspace-wrapper" class="workspace-grid">
+      <div>
+        <h4 style="color: #0284c7; margin-bottom: 8px;">📊 🌲 樹狀圖 1 (Tree Diagram 1)</h4>
+        <div id="table-holder-1"></div>
+      </div>
+      <div id="workspace-tree2-section" style="display: none;">
+        <h4 style="color: #b45309; margin-bottom: 8px;">📊 🌲 樹狀圖 2 (Tree Diagram 2)</h4>
+        <div id="table-holder-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 樹狀圖可視化區域 -->
+  <div id="tree-wrapper" class="tree-container-wrapper">
+    <div class="tree-box">
+      <h3 id="tree1-title">🌲 樹狀圖 1 (Tree Diagram 1)</h3>
+      <div id="mermaid-holder-1"></div>
+    </div>
+    <div class="tree-box" id="tree2-box" style="display: none;">
+      <h3 id="tree2-title">🌲 樹狀圖 2 (Tree Diagram 2)</h3>
+      <div id="mermaid-holder-2"></div>
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({ 
+      startOnLoad: false, 
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { nodeSpacing: 40, rankSpacing: 140 }
+    });
+
+    let inputsState = {}; 
+    let jointState = {};  
+    let jointInputSource = {}; 
+    let autoFilledFlags = {}; 
+    let debounceTimer = null;
+    
+    let isHintActive = false;
+    let currentHints = { highlightedPaths: { tree1: [], tree2: [] }, highlightedInputs: new Set() };
+
+    const defaultOptions = [
+      "A, A'",
+      "B, B'",
+      "C, C'",
+      "D, D'"
+    ];
+
+    function initApp() {
+      const layerCount = parseInt(document.getElementById('layer-count').value);
+      const container = document.getElementById('options-input-container');
+      
+      let html = `<h4 style="margin-bottom: 10px; color: #475569;">各層標籤 (Layer Labels):</h4><div class="grid-config">`;
+      for (let i = 1; i <= layerCount; i++) {
+        const val = defaultOptions[i-1] || `A, B`;
+        html += `
+          <div class="input-group">
+            <label>第 ${i} 層 (Layer ${i}):</label>
+            <input type="text" id="layer-opt-${i}" value="${val}" onchange="updateTree2OrderUI()">
+          </div>
+        `;
+      }
+      html += `</div>`;
+      container.innerHTML = html;
+
+      inputsState = {};
+      jointState = {};
+      jointInputSource = {};
+      autoFilledFlags = {};
+      updateTree2OrderUI();
+    }
+
+    function toggleSwapMode() {
+      const isSwap = document.querySelector('input[name="layer-swap"]:checked').value === 'yes';
+      const tree2Box = document.getElementById('tree2-box');
+      const work2Sec = document.getElementById('workspace-tree2-section');
+      const treeWrapper = document.getElementById('tree-wrapper');
+      const workWrapper = document.getElementById('workspace-wrapper');
+      const orderContainer = document.getElementById('tree2-order-container');
+
+      if (isSwap) {
+        tree2Box.style.display = 'block';
+        work2Sec.style.display = 'block';
+        orderContainer.style.display = 'block';
+        treeWrapper.classList.add('twins');
+        workWrapper.classList.add('twins');
+      } else {
+        tree2Box.style.display = 'none';
+        work2Sec.style.display = 'none';
+        orderContainer.style.display = 'none';
+        treeWrapper.classList.remove('twins');
+        workWrapper.classList.remove('twins');
+      }
+      updateTree2OrderUI();
+    }
+
+    function updateTree2OrderUI() {
+      const layerCount = parseInt(document.getElementById('layer-count').value);
+      const isSwap = document.querySelector('input[name="layer-swap"]:checked').value === 'yes';
+      const container = document.getElementById('tree2-order-container');
+      
+      if (!isSwap) {
+        buildAppStructure(true);
+        return;
+      }
+      
+      let existingSelections = [];
+      for (let i = 0; i < layerCount; i++) {
+        const el = document.getElementById(`tree2-pos-${i}`);
+        if (el) existingSelections.push(el.value);
+      }
+      
+      let html = `<h4 style="margin-bottom: 8px; color: #b45309;">🔄 樹狀圖 2 層級 (Tree 2 Layers):</h4><div style="display:flex; gap:15px; flex-wrap:wrap;">`;
+      for (let i = 0; i < layerCount; i++) {
+        let currentSel = existingSelections[i] !== undefined ? parseInt(existingSelections[i]) : (layerCount - 1 - i);
+        html += `
+          <div style="display:flex; align-items:center; gap:5px;">
+            <label style="margin-bottom:0; font-size:14px; font-weight:normal;">第 ${i+1} 層 (Layer ${i+1}):</label>
+            <select id="tree2-pos-${i}" onchange="buildAppStructure(true)" style="width:auto; padding:5px 8px; font-size:14px;">
+        `;
+        for (let j = 0; j < layerCount; j++) {
+          const rawText = document.getElementById(`layer-opt-${j+1}`)?.value || `選項 ${j+1}`;
+          const firstOpt = rawText.split(',')[0].trim();
+          const selected = (j === currentSel) ? 'selected' : '';
+          html += `<option value="${j}" ${selected}>原第 ${j+1} 層 (${firstOpt})</option>`;
+        }
+        html += `</select></div>`;
+      }
+      html += `</div>`;
+      container.innerHTML = html;
+      
+      buildAppStructure(true);
+    }
+
+    function getLayersData(isTree2 = false) {
+      const layerCount = parseInt(document.getElementById('layer-count').value);
+      let originalLayers = [];
+      for (let i = 1; i <= layerCount; i++) {
+        const raw = document.getElementById(`layer-opt-${i}`).value;
+        const opts = raw.split(',').map(s => s.trim()).filter(s => s !== '');
+        if (opts.length > 0) originalLayers.push(opts);
+      }
+      
+      if (!isTree2) return originalLayers;
+
+      let arrangedLayers = [];
+      for (let i = 0; i < layerCount; i++) {
+        const selectEl = document.getElementById(`tree2-pos-${i}`);
+        if (selectEl) {
+          const sourceIdx = parseInt(selectEl.value);
+          if (originalLayers[sourceIdx]) arrangedLayers.push(originalLayers[sourceIdx]);
+        } else {
+          if (originalLayers[layerCount - 1 - i]) arrangedLayers.push(originalLayers[layerCount - 1 - i]);
+        }
+      }
+      return arrangedLayers;
+    }
+
+    function toggleHintMode() {
+      isHintActive = !isHintActive;
+      const btn = document.getElementById('btn-hint');
+      if (isHintActive) {
+        btn.innerText = "⭐ 隱藏提示 (Hide Hint)";
+        btn.style.backgroundColor = "#eab308";
+        btn.style.color = "#0f172a";
+      } else {
+        btn.innerText = "💡 提示 (Hint)";
+        btn.style.backgroundColor = "#d97706";
+        btn.style.color = "white";
+      }
+      buildAppStructure(false);
+    }
+
+    function checkProbabilityValid(val) {
+      val = val.trim();
+      if (!val || val === "?" || val === "") return true;
+      if (/[a-zA-Z]/.test(val)) return true; 
+      
+      if (/^\d+\/\d+$/.test(val)) {
+        let parts = val.split('/');
+        let num = parseFloat(parts[0]);
+        let den = parseFloat(parts[1]);
+        if (den === 0) return false;
+        let res = num / den;
+        return (res >= 0 && res <= 1);
+      }
+      if (/^\d+(\.\d+)?$/.test(val)) {
+        let res = parseFloat(val);
+        return (res >= 0 && res <= 1);
+      }
+      return false; 
+    }
+
+    function getComplement(val) {
+      val = val.trim();
+      if (!val) return "";
+      if (/^\d+(\.\d+)?$/.test(val)) {
+        let num = parseFloat(val);
+        if (num >= 0 && num <= 1) {
+          return parseFloat((1 - num).toFixed(4)).toString();
+        }
+      }
+      if (/^\d+\/\d+$/.test(val)) {
+        let parts = val.split('/');
+        let num = parseInt(parts[0]);
+        let den = parseInt(parts[1]);
+        if (den > 0 && num <= den) {
+          return `${den - num}/${den}`;
+        }
+      }
+      return `1 - ${val}`;
+    }
+
+    function computeHints() {
+      let highlightedPaths = { tree1: [], tree2: [] };
+      let highlightedInputs = new Set();
+
+      if (!isHintActive) return { highlightedPaths, highlightedInputs };
+
+      function getTreePaths(treeId, layers) {
+        let paths = [];
+        function recurse(layerIdx, currentLabels, currentKeys) {
+          if (layerIdx >= layers.length) {
+            const sortedJointKey = [...currentLabels].sort().join('__');
+            paths.push({ treeId, labels: currentLabels, branchKeys: currentKeys, jointKey: sortedJointKey });
+            return;
+          }
+          layers[layerIdx].forEach(opt => {
+            const nextLabels = [...currentLabels, opt];
+            const nextKey = `${treeId}_${nextLabels.join('->')}`;
+            recurse(layerIdx + 1, nextLabels, [...currentKeys, nextKey]);
+          });
+        }
+        recurse(0, [], []);
+        return paths;
+      }
+
+      function checkTree(treeId, layers) {
+        const paths = getTreePaths(treeId, layers);
+        paths.forEach(path => {
+          let branchValues = [];
+          path.branchKeys.forEach(k => branchValues.push(inputsState[k] || ""));
+          branchValues.push(jointState[path.jointKey] || "");
+
+          let uniqueVars = new Set();
+          let emptyCount = 0;
+
+          branchValues.forEach(v => {
+            v = v.trim();
+            if (v === "" || v === "?") {
+              emptyCount++;
+            } else {
+              let matches = v.match(/[a-zA-Z]'*/g);
+              if (matches) {
+                matches.forEach(variable => uniqueVars.add(variable));
+              }
+            }
+          });
+
+          let totalUnknowns = uniqueVars.size + emptyCount;
+          if (totalUnknowns === 1) {
+            highlightedPaths[treeId].push(path);
+            path.branchKeys.forEach(k => highlightedInputs.add(`input_${k}`));
+            highlightedInputs.add(`joint_${treeId}_${path.jointKey}`);
+          }
+        });
+      }
+
+      checkTree('tree1', getLayersData(false));
+      const isSwap = document.querySelector('input[name="layer-swap"]:checked').value === 'yes';
+      if (isSwap) {
+        checkTree('tree2', getLayersData(true));
+      }
+
+      return { highlightedPaths, highlightedInputs };
+    }
+
+    function updateTableHighlightClasses(highlightedInputs) {
+      document.querySelectorAll('.prob-table tr').forEach(tr => {
+        tr.style.backgroundColor = '';
+      });
+
+      if (!isHintActive) return;
+
+      highlightedInputs.forEach(targetId => {
+        let inputEl = document.getElementById(targetId);
+        if (!inputEl && targetId.startsWith('joint_')) {
+          const parts = targetId.split('_');
+          const jointKey = parts.slice(2).join('_');
+          const inputs = document.querySelectorAll(`[data-joint-key="${jointKey}"]`);
+          inputs.forEach(input => {
+            const row = input.closest('tr');
+            if (row) row.style.backgroundColor = '#fef08a';
+          });
+          return;
+        }
+        if (inputEl) {
+          const row = inputEl.closest('tr');
+          if (row) row.style.backgroundColor = '#fef08a';
+        }
+      });
+    }
+
+    function buildAppStructure(rebuildTables = false) {
+      const layers1 = getLayersData(false);
+      const layers2 = getLayersData(true);
+      const isSwap = document.querySelector('input[name="layer-swap"]:checked').value === 'yes';
+
+      document.getElementById('tree1-title').innerText = `🌲 樹狀圖 1 (Tree Diagram 1): ${layers1.map(l => l[0]).join(' → ')}`;
+      if (isSwap) {
+        document.getElementById('tree2-title').innerText = `🌲 樹狀圖 2 (Tree Diagram 2): ${layers2.map(l => l[0]).join(' → ')}`;
+      }
+
+      currentHints = computeHints();
+
+      if (rebuildTables) {
+        const activeId = document.activeElement ? document.activeElement.id : null;
+        renderTable('tree1', layers1, document.getElementById('table-holder-1'));
+        if (isSwap) {
+          renderTable('tree2', layers2, document.getElementById('table-holder-2'));
+        }
+        if (activeId) {
+          const el = document.getElementById(activeId);
+          if (el) el.focus();
+        }
+      }
+
+      updateTableHighlightClasses(currentHints.highlightedInputs);
+      triggerDebouncedRender();
+    }
+
+    function renderTable(treeId, layers, targetContainer) {
+      let html = `<table class="prob-table">
+                    <thead>
+                      <tr>
+                        <th>機率類型 (Type)</th>
+                        <th>填寫 (Value)</th>
+                      </tr>
+                    </thead>
+                    <tbody>`;
+
+      function traverseForTable(currentLayerIdx, currentPathLabels) {
+        if (currentLayerIdx >= layers.length) return;
+        const currentOptions = layers[currentLayerIdx];
+        
+        currentOptions.forEach((opt) => {
+          const newLabels = [...currentPathLabels, opt];
+          const pathKey = newLabels.join('->');
+          const inputKey = `${treeId}_${pathKey}`;
+          
+          let displayLabel = currentPathLabels.length === 0 ? `P(${opt})` : `P(${opt} | ${currentPathLabels.join(' ∩ ')})`;
+          const currentVal = inputsState[inputKey] || "";
+          const isAuto = autoFilledFlags[inputKey] ? "auto-filled" : "";
+          const readonlyAttr = autoFilledFlags[inputKey] ? "readonly" : "";
+
+          // 核心修復點 1：使用 .replace(/'/g, "\\'") 避免單引號切斷字串
+          const escapedPath = currentPathLabels.join('->').replace(/'/g, "\\'");
+          const escapedOpt = opt.replace(/'/g, "\\'");
+
+          html += `<tr>
+                    <td>${displayLabel}</td>
+                    <td>
+                      <input type="text" class="prob-input ${isAuto}" id="input_${inputKey}" 
+                        value="${currentVal}" ${readonlyAttr}
+                        placeholder="請填寫" onchange="onConditionalInputChange('${treeId}', '${escapedPath}', '${escapedOpt}', this.value)">
+                    </td>
+                  </tr>`;
+          traverseForTable(currentLayerIdx + 1, newLabels);
+        });
+      }
+      traverseForTable(0, []);
+
+      html += `<tr><td colspan="2" style="background:#f8fafc; font-weight:bold; color:#334155;">🏁 聯合機率 Outcomes (交集)</td></tr>`;
+
+      function traverseForJoints(currentLayerIdx, currentPathLabels) {
+        if (currentLayerIdx >= layers.length) {
+          const outcomeName = currentPathLabels.join(' ∩ ');
+          const sortedKey = [...currentPathLabels].sort().join('__'); 
+          const currentVal = jointState[sortedKey] || "";
+          const jointInputId = `joint_${treeId}_${sortedKey}`;
+          
+          let isJointAuto = false;
+          let jointReadonly = "";
+          if (currentVal && jointInputSource[sortedKey] && jointInputSource[sortedKey] !== jointInputId) {
+            isJointAuto = true;
+            jointReadonly = "readonly";
+          }
+          const jointAutoClass = isJointAuto ? "auto-filled" : "";
+
+          // 核心修復點 2：對 sortedKey 和 jointInputId 也加上單引號防禦轉義
+          const escapedSortedKey = sortedKey.replace(/'/g, "\\'");
+          const escapedInputId = jointInputId.replace(/'/g, "\\'");
+
+          html += `<tr>
+                    <td>P(${outcomeName})</td>
+                    <td>
+                      <input type="text" class="prob-input ${jointAutoClass}" id="${jointInputId}" data-joint-key="${sortedKey}" value="${currentVal}" ${jointReadonly}
+                        placeholder="請填寫" onchange="onJointInputChange('${escapedSortedKey}', this.value, '${escapedInputId}')">
+                    </td>
+                  </tr>`;
+          return;
+        }
+        layers[currentLayerIdx].forEach(opt => {
+          traverseForJoints(currentLayerIdx + 1, [...currentPathLabels, opt]);
+        });
+      }
+      traverseForJoints(0, []);
+
+      html += `</tbody></table>`;
+      targetContainer.innerHTML = html;
+    }
+
+    function onConditionalInputChange(treeId, parentPath, currentOpt, value) {
+      const currentPathKey = parentPath === "" ? currentOpt : `${parentPath}->${currentOpt}`;
+      const targetInputKey = `${treeId}_${currentPathKey}`;
+
+      if (!checkProbabilityValid(value)) {
+        alert("0 < 機率 < 1");
+        inputsState[targetInputKey] = "";
+        clearSiblingIfAuto(treeId, parentPath, currentOpt);
+        buildAppStructure(true);
+        return;
+      }
+
+      if (value.trim() === "" || value.trim() === "?") {
+        inputsState[targetInputKey] = "";
+        delete autoFilledFlags[targetInputKey];
+        clearSiblingIfAuto(treeId, parentPath, currentOpt);
+        buildAppStructure(true);
+        return;
+      }
+
+      inputsState[targetInputKey] = value;
+      delete autoFilledFlags[targetInputKey];
+
+      const layers = (treeId === 'tree1') ? getLayersData(false) : getLayersData(true);
+      const currentLayerIdx = parentPath === "" ? 0 : parentPath.split('->').length;
+      const currentOptions = layers[currentLayerIdx];
+
+      if (currentOptions && currentOptions.length === 2) {
+        const siblingOpt = currentOptions.find(o => o !== currentOpt);
+        const siblingPathKey = parentPath === "" ? siblingOpt : `${parentPath}->${siblingOpt}`;
+        const siblingInputKey = `${treeId}_${siblingPathKey}`;
+
+        const formula = getComplement(value); 
+        inputsState[siblingInputKey] = formula;
+        autoFilledFlags[siblingInputKey] = true;
+      }
+      
+      buildAppStructure(true);
+    }
+
+    function clearSiblingIfAuto(treeId, parentPath, currentOpt) {
+      const layers = (treeId === 'tree1') ? getLayersData(false) : getLayersData(true);
+      const currentLayerIdx = parentPath === "" ? 0 : parentPath.split('->').length;
+      const currentOptions = layers[currentLayerIdx];
+      if (currentOptions && currentOptions.length === 2) {
+        const siblingOpt = currentOptions.find(o => o !== currentOpt);
+        const siblingPathKey = parentPath === "" ? siblingOpt : `${parentPath}->${siblingOpt}`;
+        const siblingInputKey = `${treeId}_${siblingPathKey}`;
+        if (autoFilledFlags[siblingInputKey]) {
+          inputsState[siblingInputKey] = "";
+          delete autoFilledFlags[siblingInputKey];
+        }
+      }
+    }
+
+    function onJointInputChange(sortedKey, value, sourceId) {
+      if (value.trim() === "" || value.trim() === "?") {
+        jointState[sortedKey] = "";
+        delete jointInputSource[sortedKey];
+        buildAppStructure(true);
+        return;
+      }
+
+      if (!checkProbabilityValid(value)) {
+        alert("0 < 機率 < 1");
+        jointState[sortedKey] = "";
+        delete jointInputSource[sortedKey];
+        buildAppStructure(true);
+        return;
+      }
+
+      jointState[sortedKey] = value;
+      jointInputSource[sortedKey] = sourceId; 
+      
+      buildAppStructure(true);
+    }
+
+    function triggerDebouncedRender() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        const layers1 = getLayersData(false);
+        const layers2 = getLayersData(true);
+        const isSwap = document.querySelector('input[name="layer-swap"]:checked').value === 'yes';
+
+        renderMermaidTree('tree1', layers1, 'mermaid-holder-1');
+        if (isSwap) {
+          renderMermaidTree('tree2', layers2, 'mermaid-holder-2');
+        }
+      }, 250); 
+    }
+
+    function renderMermaidTree(treeId, layers, holderId) {
+      let nodeCounter = 0;
+      let edgeCounter = 0; 
+      let syntax = "graph LR\n";
+      syntax += `  root((開始)) \n`;
+
+      let pathVisualElements = {};
+
+      function buildSyntax(layerIndex, parentNodeId, currentPathLabels, currentNodes, currentEdges) {
+        if (layerIndex >= layers.length) {
+          const outcomeName = currentPathLabels.join(' and <br>');
+          const sortedKey = [...currentPathLabels].sort().join('__'); 
+          const jointVal = jointState[sortedKey] || "?";
+          const leafId = `${treeId}_leaf_${nodeCounter++}`;
+          
+          const edgeId = edgeCounter++;
+          syntax += `  ${parentNodeId} --> ${leafId}("[${outcomeName}]<br><b>P = ${jointVal}</b>")\n`;
+          syntax += `  style ${leafId} fill:#f0fdf4,stroke:#16a34a,stroke-width:2px\n`;
+          
+          const pathKey = currentPathLabels.join('->');
+          pathVisualElements[pathKey] = {
+            nodes: [...currentNodes, leafId],
+            edges: [...currentEdges, edgeId]
+          };
+          return;
+        }
+
+        const currentOptions = layers[layerIndex];
+        currentOptions.forEach(opt => {
+          const myNodeId = `${treeId}_node_${nodeCounter++}`;
+          const newLabels = [...currentPathLabels, opt];
+          const pathKey = newLabels.join('->');
+          const probVal = inputsState[`${treeId}_${pathKey}`] || "?";
+
+          const edgeId = edgeCounter++;
+          syntax += `  ${parentNodeId} --> |"${probVal}"| ${myNodeId}("${opt}")\n`;
+          
+          buildSyntax(layerIndex + 1, myNodeId, newLabels, [...currentNodes, myNodeId], [...currentEdges, edgeId]);
+        });
+      }
+
+      buildSyntax(0, 'root', [], ['root'], []);
+
+      if (isHintActive && currentHints && currentHints.highlightedPaths[treeId]) {
+        let allHighlightedNodes = new Set();
+        let allHighlightedEdges = new Set();
+
+        currentHints.highlightedPaths[treeId].forEach(path => {
+          const pathKey = path.labels.join('->');
+          const elems = pathVisualElements[pathKey];
+          if (elems) {
+            elems.nodes.forEach(n => allHighlightedNodes.add(n));
+            elems.edges.forEach(e => allHighlightedEdges.add(e));
+          }
+        });
+
+        allHighlightedNodes.forEach(nodeId => {
+          if (nodeId === 'root') {
+            syntax += `  style root fill:#fef08a,stroke:#f59e0b,stroke-width:3px\n`;
+          } else if (nodeId.includes('_leaf_')) {
+            syntax += `  style ${nodeId} fill:#fef08a,stroke:#f59e0b,stroke-width:3px\n`;
+          } else {
+            syntax += `  style ${nodeId} fill:#fef08a,stroke:#f59e0b,stroke-width:2px\n`;
+          }
+        });
+
+        if (allHighlightedEdges.size > 0) {
+          const edgeArray = Array.from(allHighlightedEdges);
+          syntax += `  linkStyle ${edgeArray.join(',')} stroke:#f59e0b,stroke-width:4px;\n`;
+        }
+      }
+
+      const holder = document.getElementById(holderId);
+      holder.innerHTML = `<div class="mermaid">${syntax}</div>`;
+      
+      try {
+        mermaid.run({ nodes: holder.querySelectorAll('.mermaid') });
+      } catch (err) {}
+    }
+
+    function resetProbabilities() {
+      inputsState = {};
+      jointState = {};
+      jointInputSource = {};
+      autoFilledFlags = {};
+      buildAppStructure(true);
+    }
+
+    window.onload = function() {
+      initApp();
+    };
+  </script>
+</body>
+</html>
