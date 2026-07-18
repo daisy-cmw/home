@@ -29,14 +29,58 @@
             box-sizing: border-box;
         }
 
-        /* 主標題樣式 */
-        h2 {
-            color: #1a4f43; /* 深翡翠綠 */
-            text-align: center;
-            font-size: 2.2em;
-            margin-top: 10px;
+        /* 🎯 頂部標題區塊（頭像與文字並排） */
+        .header-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
             margin-bottom: 25px;
             padding-bottom: 15px;
+            flex-wrap: wrap; /* RWD 手機版自動換行 */
+        }
+
+        .header-avatar {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+        }
+
+        .header-text {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .header-text h2 {
+            color: #1a4f43; /* 深翡翠綠 */
+            font-size: 2.2em;
+            margin: 0;
+            padding: 0;
+            text-align: left;
+        }
+
+        .header-text .subtitle {
+            color: #2ecc71; /* 鮮明綠色 */
+            font-size: 1.5em;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        /* 針對手機端的排版微調 */
+        @media (max-width: 600px) {
+            .header-wrapper {
+                text-align: center;
+                flex-direction: column;
+            }
+            .header-text h2 {
+                text-align: center;
+                font-size: 1.8em;
+            }
+            .header-text .subtitle {
+                text-align: center;
+                font-size: 1.2em;
+            }
         }
 
         /* 快速導覽列 */
@@ -106,9 +150,6 @@
             ol {
                 grid-template-columns: 1fr;
             }
-            h2 {
-                font-size: 1.8em;
-            }
             .container {
                 padding: 20px;
             }
@@ -149,7 +190,6 @@
         li {
             counter-increment: step-counter;
         }
-        /* 💡 修正：只給第一個 a 加上編號，避免語音版按鈕出現重複編號 */
         li a:first-child::before {
             content: counter(step-counter) ". ";
             margin-right: 5px;
@@ -165,7 +205,7 @@
             counter-reset: step-counter;
         }
 
-        /* 🎯 故事書特別卡片樣式：改為垂直佈局，給語音按鈕留空間 */
+        /* 故事書特別卡片樣式：改為垂直佈局，給語音按鈕留空間 */
         .story-card {
             display: flex;
             flex-direction: column;
@@ -180,7 +220,6 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.01);
         }
         
-        /* 當滑鼠移到整張故事大卡片上 */
         .story-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 8px 20px rgba(26, 79, 67, 0.15);
@@ -188,7 +227,6 @@
             border-color: #1a4f43;
         }
 
-        /* 大卡片內部的 PDF 連結樣式（去除原本的 background，改由 .story-card 統一控制背景） */
         .story-pdf-link {
             display: block;
             background: transparent !important;
@@ -197,18 +235,18 @@
             box-shadow: none !important;
             color: #34495e !important;
             font-weight: 600;
-            margin-bottom: 15px; /* 與下方語音按鈕拉開距離 */
+            margin-bottom: 15px; 
         }
         .story-card:hover .story-pdf-link {
-            color: #1a4f43 !important; /* 懸停時標題變深綠 */
+            color: #1a4f43 !important;
         }
 
-        /* 🎧 語音版膠囊小按鈕：優雅居下 */
+        /* 🎧 語音版膠囊小按鈕 */
         .audio-btn {
             display: inline-flex !important;
             align-items: center;
             justify-content: center;
-            align-self: flex-start; /* 靠左對齊，不強行拉寬 */
+            align-self: flex-start;
             background: #eef5f1 !important;
             color: #1a4f43 !important;
             padding: 6px 16px !important;
@@ -237,7 +275,7 @@
             color: #888;
         }
 
-        /* 🎨 自製終極綠色 Badge 計數器 */
+        /* 自製終極綠色 Badge 計數器 */
         .badge-counter {
             display: inline-flex;
             align-items: center;
@@ -268,7 +306,14 @@
 <body>
 
 <div class="container">
-    <h2>👩‍🏫 歡迎來到 Miss Chow 的數學網站</h2>
+    <!-- 🎯 頂部排版更新：頭像與雙語標題並排 -->
+    <div class="header-wrapper">
+        <img src="MsChow.gif" alt="Ms Chow" class="header-avatar">
+        <div class="header-text">
+            <h2>歡迎來到 Miss Chow 的數學網站</h2>
+            <div class="subtitle">Welcome to Miss Chow's Mathematics Website</div>
+        </div>
+    </div>
 
     <div class="quick-nav">
         <a href="#s4-section">S.4</a>
@@ -283,7 +328,8 @@
 
     <h3 id="s5-section">S.5 Chapter 10 Permutation and Combination</h3>
     <ol>
-        <li><a href="Tree-Diagram.html">Tree Diagram</a></li>
+        <!-- 🎯 1. 名稱已更改 -->
+        <li><a href="Tree-Diagram.html">Tree Diagram (Distinct Objects)</a></li>
         <li><a href="CountingPrinciples.html">Counting Principles Game</a></li>
         
         <li>
@@ -301,7 +347,12 @@
 
     <h3>S.5 Chapter 11 More about Probability</h3>
     <ol>
-        <li><a href="Tree-Diagram2.html">Tree Diagram 2</a></li>
+        <!-- 🎯 1. 名稱已更改 -->
+        <li><a href="Tree-Diagram2.html">Tree Diagram 2 (Same Objects)</a></li>
+        <!-- 🎯 2. 新增的 Solver V1 -->
+        <li><a href="Tree-Diagram_exercise_V1.html">Probability Tree Diagram Solver V1</a></li>
+        <!-- 🎯 3. 新增的 Solver V2 -->
+        <li><a href="Tree-Diagram_exercise_V2.html">Probability Tree Diagram Solver V2</a></li>
     </ol>
 
     <h3 id="s6-section">S.6 Chapter 3 More about Graphs of Functions</h3>
