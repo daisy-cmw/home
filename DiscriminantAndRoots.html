@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quadratic Equations & Discriminant Quiz</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- MathJax for rendering math formulas -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    .math-font {
+      font-family: 'Times New Roman', Times, serif;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-3xl mx-auto space-y-6">
+    
+    <!-- Header -->
+    <header class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+      <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight text-center">
+        Quadratic Equations (Discriminant and Roots)
+      </h1>
+      <p class="text-slate-500 text-center mt-2 text-sm sm:text-base">
+        Concept Recitation & Revision Exercise
+      </p>
+    </header>
+
+    <!-- Symbol Guide -->
+    <section class="bg-blue-50/80 rounded-2xl p-5 border border-blue-100 space-y-3">
+      <h2 class="text-sm font-semibold uppercase tracking-wider text-blue-900 flex items-center gap-2">
+        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        Symbol Input Instructions
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-slate-700">
+        <div class="bg-white p-3 rounded-xl border border-blue-100 flex items-center justify-between">
+          <span class="font-medium">Power / Exponent:</span>
+          <span class="bg-slate-100 px-2 py-1 rounded text-slate-800 font-mono text-xs">$y^2 \to$ <code class="text-blue-600 font-bold">y^2</code></span>
+        </div>
+        <div class="bg-white p-3 rounded-xl border border-blue-100 flex items-center justify-between">
+          <span class="font-medium">Divide / Fraction:</span>
+          <span class="bg-slate-100 px-2 py-1 rounded text-slate-800 font-mono text-xs">$-\frac{y}{2} \to$ <code class="text-blue-600 font-bold">-y/2</code></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Form Container -->
+    <form id="quizForm" onsubmit="event.preventDefault(); submitQuiz();" class="space-y-6">
+      
+      <!-- Question 1 -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+        <div class="flex items-center justify-between">
+          <span class="bg-indigo-50 text-indigo-700 font-semibold text-xs px-3 py-1 rounded-full border border-indigo-100">Question 1</span>
+          <span id="q1-status" class="text-xs font-semibold px-2.5 py-1 rounded-full hidden"></span>
+        </div>
+        
+        <p class="text-slate-800 text-base sm:text-lg leading-relaxed">
+          For $3x^2 + kx + 2 = 0$, $\Delta =$ 
+          <input type="text" id="q1" placeholder="Enter expression" class="inline-block border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none w-52 sm:w-64 font-mono text-sm mx-1">
+          <span class="text-slate-500 text-xs sm:text-sm">(Express in terms of $k$)</span>
+        </p>
+
+        <div id="q1-fb" class="text-sm rounded-lg p-3 hidden mt-2"></div>
+      </div>
+
+      <!-- Question 2 -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+        <div class="flex items-center justify-between">
+          <span class="bg-indigo-50 text-indigo-700 font-semibold text-xs px-3 py-1 rounded-full border border-indigo-100">Question 2</span>
+        </div>
+
+        <div class="space-y-3">
+          <p class="font-medium text-slate-800">If $3x^2 + kx + 2 = 0$ has:</p>
+          <div class="space-y-2.5 pl-2">
+            
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between flex-wrap gap-2">
+              <span class="text-slate-700 text-sm">(a) no real roots</span>
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-sm">$\Delta$</span>
+                <select id="q2_a" class="border border-slate-300 rounded-md px-2.5 py-1 focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white text-sm font-bold">
+                  <option value="">--</option>
+                  <option value=">">&gt;</option>
+                  <option value=">=">&ge;</option>
+                  <option value="=">=</option>
+                  <option value="<=">&le;</option>
+                  <option value="<">&lt;</option>
+                </select>
+                <span class="font-mono text-sm">$0$</span>
+                <span id="q2_a-status" class="text-xs font-semibold px-2 py-0.5 rounded-full hidden ml-1"></span>
+              </div>
+            </div>
+
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between flex-wrap gap-2">
+              <span class="text-slate-700 text-sm">(b) 2 distinct real roots</span>
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-sm">$\Delta$</span>
+                <select id="q2_b" class="border border-slate-300 rounded-md px-2.5 py-1 focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white text-sm font-bold">
+                  <option value="">--</option>
+                  <option value=">">&gt;</option>
+                  <option value=">=">&ge;</option>
+                  <option value="=">=</option>
+                  <option value="<=">&le;</option>
+                  <option value="<">&lt;</option>
+                </select>
+                <span class="font-mono text-sm">$0$</span>
+                <span id="q2_b-status" class="text-xs font-semibold px-2 py-0.5 rounded-full hidden ml-1"></span>
+              </div>
+            </div>
+
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between flex-wrap gap-2">
+              <span class="text-slate-700 text-sm">(c) has real roots</span>
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-sm">$\Delta$</span>
+                <select id="q2_c" class="border border-slate-300 rounded-md px-2.5 py-1 focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white text-sm font-bold">
+                  <option value="">--</option>
+                  <option value=">">&gt;</option>
+                  <option value=">=">&ge;</option>
+                  <option value="=">=</option>
+                  <option value="<=">&le;</option>
+                  <option value="<">&lt;</option>
+                </select>
+                <span class="font-mono text-sm">$0$</span>
+                <span id="q2_c-status" class="text-xs font-semibold px-2 py-0.5 rounded-full hidden ml-1"></span>
+              </div>
+            </div>
+
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between flex-wrap gap-2">
+              <span class="text-slate-700 text-sm">(d) two equal real root(s)</span>
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-sm">$\Delta$</span>
+                <select id="q2_d" class="border border-slate-300 rounded-md px-2.5 py-1 focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white text-sm font-bold">
+                  <option value="">--</option>
+                  <option value=">">&gt;</option>
+                  <option value=">=">&ge;</option>
+                  <option value="=">=</option>
+                  <option value="<=">&le;</option>
+                  <option value="<">&lt;</option>
+                </select>
+                <span class="font-mono text-sm">$0$</span>
+                <span id="q2_d-status" class="text-xs font-semibold px-2 py-0.5 rounded-full hidden ml-1"></span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Question 3 -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+        <div class="flex items-center justify-between">
+          <span class="bg-indigo-50 text-indigo-700 font-semibold text-xs px-3 py-1 rounded-full border border-indigo-100">Question 3</span>
+        </div>
+
+        <div class="space-y-3">
+          <p class="font-medium text-slate-800">If $y = 3x^2 + kx + 2$:</p>
+          <div class="space-y-2.5 pl-2">
+            
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between flex-wrap gap-2">
+              <span class="text-slate-700 text-sm">(a) touches the x-axis</span>
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-sm">$\Delta$</span>
+                <select id="q3_a" class="border border-slate-300 rounded-md px-2.5 py-1 focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white text-sm font-bold">
+                  <option value="">--</option>
+                  <option value=">">&gt;</option>
+                  <option value=">=">&ge;</option>
+                  <option value="=">=</option>
+                  <option value="<=">&le;</option>
+                  <option value="<">&lt;</option>
+                </select>
+                <span class="font-mono text-sm">$0$</span>
+                <span id="q3_a-status" class="text-xs font-semibold px-2 py-0.5 rounded-full hidden ml-1"></span>
+              </div>
+            </div>
+
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between flex-wrap gap-2">
+              <span class="text-slate-700 text-sm">(b) does not intersect the x-axis</span>
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-sm">$\Delta$</span>
+                <select id="q3_b" class="border border-slate-300 rounded-md px-2.5 py-1 focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white text-sm font-bold">
+                  <option value="">--</option>
+                  <option value=">">&gt;</option>
+                  <option value=">=">&ge;</option>
+                  <option value="=">=</option>
+                  <option value="<=">&le;</option>
+                  <option value="<">&lt;</option>
+                </select>
+                <span class="font-mono text-sm">$0$</span>
+                <span id="q3_b-status" class="text-xs font-semibold px-2 py-0.5 rounded-full hidden ml-1"></span>
+              </div>
+            </div>
+
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between flex-wrap gap-2">
+              <span class="text-slate-700 text-sm">(c) intersects the x-axis at two points</span>
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-sm">$\Delta$</span>
+                <select id="q3_c" class="border border-slate-300 rounded-md px-2.5 py-1 focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white text-sm font-bold">
+                  <option value="">--</option>
+                  <option value=">">&gt;</option>
+                  <option value=">=">&ge;</option>
+                  <option value="=">=</option>
+                  <option value="<=">&le;</option>
+                  <option value="<">&lt;</option>
+                </select>
+                <span class="font-mono text-sm">$0$</span>
+                <span id="q3_c-status" class="text-xs font-semibold px-2 py-0.5 rounded-full hidden ml-1"></span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Question 4 -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-5">
+        <div class="flex items-center justify-between">
+          <span class="bg-indigo-50 text-indigo-700 font-semibold text-xs px-3 py-1 rounded-full border border-indigo-100">Question 4</span>
+        </div>
+
+        <p class="text-slate-800 text-base leading-relaxed">
+          If $m$ and $n$ are the roots of $2x^2 - 5x + 8 = 0$,
+        </p>
+
+        <!-- 4(a)-(c) -->
+        <div class="space-y-3 pl-2">
+          
+          <div class="flex items-center justify-between flex-wrap gap-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
+            <div class="flex items-center gap-2 flex-wrap text-sm sm:text-base">
+              <span class="font-medium text-slate-700">(a)</span>
+              <span>$m + n =$</span>
+              <input type="text" id="q4_a" placeholder="Enter value" class="border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none w-36 font-mono text-sm bg-white">
+              <span class="text-slate-500 text-xs">(fill in the number)</span>
+            </div>
+            <span id="q4_a-status" class="text-xs font-semibold px-2.5 py-1 rounded-full hidden"></span>
+          </div>
+
+          <div class="flex items-center justify-between flex-wrap gap-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
+            <div class="flex items-center gap-2 flex-wrap text-sm sm:text-base">
+              <span class="font-medium text-slate-700">(b)</span>
+              <span>$mn =$</span>
+              <input type="text" id="q4_b" placeholder="Enter value" class="border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none w-36 font-mono text-sm bg-white">
+              <span class="text-slate-500 text-xs">(fill in the number)</span>
+            </div>
+            <span id="q4_b-status" class="text-xs font-semibold px-2.5 py-1 rounded-full hidden"></span>
+          </div>
+
+          <div class="flex items-center justify-between flex-wrap gap-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
+            <div class="flex items-center gap-2 flex-wrap text-sm sm:text-base">
+              <span class="font-medium text-slate-700">(c)</span>
+              <span>$m^2 + n^2 =$</span>
+              <input type="text" id="q4_c" placeholder="Enter expression" class="border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none w-44 font-mono text-sm bg-white">
+              <span class="text-slate-500 text-xs">(Express in terms of $m$ and $n$)</span>
+            </div>
+            <span id="q4_c-status" class="text-xs font-semibold px-2.5 py-1 rounded-full hidden"></span>
+          </div>
+
+        </div>
+
+        <hr class="border-slate-100">
+
+        <!-- 4(d) -->
+        <div class="space-y-2">
+          <p class="text-slate-800 font-medium text-sm sm:text-base">
+            (d) Find $6m^2 + 2kn - 8$, [the index of $m$ and $n$ are different]:
+          </p>
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between flex-wrap gap-2 pl-4">
+            <div class="text-sm sm:text-base text-slate-700">
+              Sub <input type="text" id="q4_d" placeholder="Enter step" class="border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none w-48 font-mono text-sm bg-white mx-1"> into $3x^2 + kx + 2 = 0$
+            </div>
+            <span id="q4_d-status" class="text-xs font-semibold px-2.5 py-1 rounded-full hidden"></span>
+          </div>
+        </div>
+
+        <hr class="border-slate-100">
+
+        <!-- 4(e) -->
+        <div class="space-y-3">
+          <p class="text-slate-800 font-medium text-sm sm:text-base">
+            (e) Form a quadratic equation with roots $(m+3)$ and $(n+3)$:
+          </p>
+
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3 text-sm sm:text-base">
+            
+            <!-- Step 1 -->
+            <div class="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-slate-200/60">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="font-medium text-slate-700">Step 1:</span>
+                <input type="text" id="q4_e_s1_name" placeholder="Enter one English word" class="border border-slate-300 rounded-lg px-2.5 py-1 focus:ring-2 focus:ring-indigo-500 focus:outline-none w-44 font-mono text-sm bg-white">
+                <span>of roots $=$</span>
+                <input type="text" id="q4_e_s1_val" placeholder="Enter expression" class="border border-slate-300 rounded-lg px-3 py-1 focus:ring-2 focus:ring-indigo-500 focus:outline-none w-44 font-mono text-sm bg-white">
+                <span class="text-slate-500 text-xs">(Express in terms of $m$ and $n$)</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <span id="q4_e_s1_name-status" class="text-xs font-semibold px-2 py-0.5 rounded-full hidden"></span>
+                <span id="q4_e_s1_val-status" class="text-xs font-semibold px-2 py-0.5 rounded-full hidden"></span>
+              </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-slate-200/60">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="font-medium text-slate-700">Step 2:</span>
+                <input type="text" id="q4_e_s2_name" placeholder="Enter one English word" class="border border-slate-300 rounded-lg px-2.5 py-1 focus:ring-2 focus:ring-indigo-500 focus:outline-none w-44 font-mono text-sm bg-white">
+                <span>of roots $=$</span>
+                <input type="text" id="q4_e_s2_val" placeholder="Enter expression" class="border border-slate-300 rounded-lg px-3 py-1 focus:ring-2 focus:ring-indigo-500 focus:outline-none w-44 font-mono text-sm bg-white">
+                <span class="text-slate-500 text-xs">(Express in terms of $m$ and $n$)</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <span id="q4_e_s2_name-status" class="text-xs font-semibold px-2 py-0.5 rounded-full hidden"></span>
+                <span id="q4_e_s2_val-status" class="text-xs font-semibold px-2 py-0.5 rounded-full hidden"></span>
+              </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-medium text-slate-700">Step 3:</span>
+                <span>The equation is</span>
+                <input type="text" id="q4_e_s3" placeholder="Enter equation" class="border border-slate-300 rounded-lg px-3 py-1 focus:ring-2 focus:ring-indigo-500 focus:outline-none w-52 font-mono text-sm bg-white">
+              </div>
+              <span id="q4_e_s3-status" class="text-xs font-semibold px-2 py-0.5 rounded-full hidden"></span>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Declaration Section -->
+      <div class="bg-amber-50/80 rounded-2xl p-6 border border-amber-200/80 space-y-4">
+        <div class="flex items-start gap-3">
+          <input type="checkbox" id="declaration" onchange="toggleSubmitBtn()" class="mt-1 h-5 w-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 cursor-pointer">
+          <label for="declaration" class="text-slate-800 font-medium text-sm sm:text-base cursor-pointer leading-snug">
+            聲明：我承諾往後測驗前必定會盡全力溫習！<br>
+            <span class="text-slate-600 text-xs sm:text-sm font-normal">Declaration: I promise to do my best in studying for future tests!</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="pt-2">
+        <button type="submit" id="submitBtn" disabled class="w-full bg-slate-300 text-slate-500 font-bold py-4 rounded-xl shadow-none transition-all duration-200 cursor-not-allowed text-base sm:text-lg">
+          Submit
+        </button>
+      </div>
+
+    </form>
+
+    <!-- Results Modal / Banner -->
+    <div id="resultCard" class="bg-white rounded-2xl p-6 shadow-lg border border-slate-200 hidden space-y-4 text-center">
+      <h2 class="text-2xl font-bold text-slate-900">Quiz Completed!</h2>
+      <div class="inline-block bg-indigo-50 border border-indigo-100 rounded-2xl p-4 px-8">
+        <span class="text-slate-500 text-xs uppercase tracking-wider block font-semibold">Your Score</span>
+        <span id="finalScore" class="text-4xl font-extrabold text-indigo-600">0 / 17</span>
+        <span id="percentage" class="text-sm text-slate-500 block mt-1">(0%)</span>
+      </div>
+      <p id="motivationalText" class="text-slate-700 font-medium"></p>
+    </div>
+
+  </div>
+
+  <script>
+    function toggleSubmitBtn() {
+      const checkbox = document.getElementById('declaration');
+      const btn = document.getElementById('submitBtn');
+      if (checkbox.checked) {
+        btn.disabled = false;
+        btn.className = "w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-indigo-200 transition-all duration-200 cursor-pointer text-base sm:text-lg";
+      } else {
+        btn.disabled = true;
+        btn.className = "w-full bg-slate-300 text-slate-500 font-bold py-4 rounded-xl shadow-none transition-all duration-200 cursor-not-allowed text-base sm:text-lg";
+      }
+    }
+
+    // Helper: Normalize string by stripping whitespace and converting to lowercase
+    function norm(str) {
+      if (!str) return '';
+      return str.toString().toLowerCase().replace(/\s+/g, '');
+    }
+
+    function setBadge(elementId, isCorrect, correctAnsText) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      el.classList.remove('hidden');
+      if (isCorrect) {
+        el.className = 'text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200';
+        el.innerText = 'Correct ✓';
+      } else {
+        el.className = 'text-xs font-semibold px-2.5 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-200';
+        el.innerText = correctAnsText ? `Incorrect ✗ (Ans: ${correctAnsText})` : 'Incorrect ✗';
+      }
+    }
+
+    function submitQuiz() {
+      let score = 0;
+      const totalScore = 17;
+
+      // Q1
+      const q1Val = norm(document.getElementById('q1').value);
+      const q1Valid = ['k^2-4(3)(2)', 'k^2-4*3*2', 'k^2-24', 'k**2-24', 'k^2-4(2)(3)'].includes(q1Val);
+      if (q1Valid) score++;
+      setBadge('q1-status', q1Valid, 'k^2-24');
+      const q1Fb = document.getElementById('q1-fb');
+      q1Fb.classList.remove('hidden');
+      q1Fb.className = q1Valid ? 'text-sm rounded-lg p-3 bg-emerald-50 border border-emerald-200 text-emerald-900 font-medium' : 'text-sm rounded-lg p-3 bg-rose-50 border border-rose-200 text-rose-900';
+      q1Fb.innerHTML = q1Valid ? 'Great job! Your answer is correct.' : '<strong>Solution:</strong> Discriminant (Δ) = k^2 - 4(3)(2) = k^2 - 24';
+
+      // Q2 (a)-(d)
+      const q2a = document.getElementById('q2_a').value === '<';
+      const q2b = document.getElementById('q2_b').value === '>';
+      const q2c = document.getElementById('q2_c').value === '>=';
+      const q2d = document.getElementById('q2_d').value === '=';
+
+      if (q2a) score++; setBadge('q2_a-status', q2a, '<');
+      if (q2b) score++; setBadge('q2_b-status', q2b, '>');
+      if (q2c) score++; setBadge('q2_c-status', q2c, '>=');
+      if (q2d) score++; setBadge('q2_d-status', q2d, '=');
+
+      // Q3 (a)-(c)
+      const q3a = document.getElementById('q3_a').value === '=';
+      const q3b = document.getElementById('q3_b').value === '<';
+      const q3c = document.getElementById('q3_c').value === '>';
+
+      if (q3a) score++; setBadge('q3_a-status', q3a, '=');
+      if (q3b) score++; setBadge('q3_b-status', q3b, '<');
+      if (q3c) score++; setBadge('q3_c-status', q3c, '>');
+
+      // Q4 (a)-(c)
+      const q4aValid = ['5/2', '2.5', '+5/2'].includes(norm(document.getElementById('q4_a').value));
+      const q4bValid = ['8/2', '4'].includes(norm(document.getElementById('q4_b').value));
+      const q4cValid = ['(m+n)^2-2mn', '(m+n)^2-2*m*n', 'm^2+n^2'].includes(norm(document.getElementById('q4_c').value));
+
+      if (q4aValid) score++; setBadge('q4_a-status', q4aValid, '5/2 or 2.5');
+      if (q4bValid) score++; setBadge('q4_b-status', q4bValid, '4');
+      if (q4cValid) score++; setBadge('q4_c-status', q4cValid, '(m+n)^2-2mn');
+
+      // Q4 (d)
+      const q4dVal = norm(document.getElementById('q4_d').value);
+      const q4dValid = ['x=m', 'x=n', 'x=morx=n', 'x=norx=m', 'm', 'n', 'm,n'].includes(q4dVal);
+      if (q4dValid) score++; setBadge('q4_d-status', q4dValid, 'x = m or x = n');
+
+      // Q4 (e) - Flexible matching for Step 1 sum (e.g. (m+3)+(n+3), m+n+6, etc.)
+      const s1Name = norm(document.getElementById('q4_e_s1_name').value) === 'sum';
+      const s1ValInput = norm(document.getElementById('q4_e_s1_val').value);
+      const s1ValValid = ['(m+3)+(n+3)', 'm+3+n+3', 'm+n+6', '6+m+n'].includes(s1ValInput);
+
+      const s2Name = norm(document.getElementById('q4_e_s2_name').value) === 'product';
+      const s2ValInput = norm(document.getElementById('q4_e_s2_val').value);
+      const s2ValValid = ['(m+3)(n+3)', '(m+3)*(n+3)', 'mn+3m+3n+9', 'mn+3(m+n)+9'].includes(s2ValInput);
+
+      const s3Val = [
+        'x^2-sx+p=0', 
+        'x^2-s*x+p=0',
+        'x^2-(m+n+6)x+(mn+3(m+n)+9)=0'
+      ].includes(norm(document.getElementById('q4_e_s3').value));
+
+      if (s1Name) score++; setBadge('q4_e_s1_name-status', s1Name, 'Sum');
+      if (s1ValValid) score++; setBadge('q4_e_s1_val-status', s1ValValid, '(m+3)+(n+3)');
+      if (s2Name) score++; setBadge('q4_e_s2_name-status', s2Name, 'Product');
+      if (s2ValValid) score++; setBadge('q4_e_s2_val-status', s2ValValid, '(m+3)(n+3)');
+      if (s3Val) score++; setBadge('q4_e_s3-status', s3Val, 'x^2 - S x + P = 0');
+
+      // Lock Inputs
+      const inputs = document.querySelectorAll('input, select, button');
+      inputs.forEach(el => el.disabled = true);
+
+      // Display Final Results
+      const resCard = document.getElementById('resultCard');
+      resCard.classList.remove('hidden');
+      document.getElementById('finalScore').innerText = `${score} / ${totalScore}`;
+      const pct = Math.round((score / totalScore) * 100);
+      document.getElementById('percentage').innerText = `(${pct}%)`;
+
+      const msg = document.getElementById('motivationalText');
+      if (score === totalScore) {
+        msg.innerText = "🌟 Excellent! Perfect understanding of concepts!";
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      } else if (score >= 12) {
+        msg.innerText = "👍 Good effort! Check the incorrect sub-questions to revise.";
+      } else {
+        msg.innerText = "💪 Keep practicing! Go through the answers carefully and try again.";
+      }
+
+      resCard.scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
