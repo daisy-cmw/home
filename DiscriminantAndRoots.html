@@ -40,6 +40,31 @@
       </p>
     </header>
 
+    <!-- Student Information Section -->
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+      <h3 class="font-bold text-xs text-slate-500 uppercase tracking-wider border-b border-slate-100 pb-2">Student Information</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+        <div class="flex flex-col gap-1">
+          <label for="studentClass" class="font-semibold text-slate-600">Class 班別</label>
+          <select id="studentClass" required class="bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="">-- Select --</option>
+            <option value="4A">4A</option>
+            <option value="4B">4B</option>
+            <option value="4C">4C</option>
+            <option value="4D">4D</option>
+          </select>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="studentClassNo" class="font-semibold text-slate-600">Class No. 座號</label>
+          <input type="number" id="studentClassNo" required min="1" max="45" placeholder="e.g. 12" class="bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="studentName" class="font-semibold text-slate-600">Name 姓名</label>
+          <input type="text" id="studentName" required placeholder="English Name" class="bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+      </div>
+    </div>
+
     <!-- Symbol Guide -->
     <section class="bg-blue-50/80 rounded-2xl p-5 border border-blue-100 space-y-3">
       <h2 class="text-sm font-semibold uppercase tracking-wider text-blue-900 flex items-center gap-2">
@@ -404,7 +429,40 @@
       }
     }
 
+    // 傳送學生資料及分數至 Google Sheets 後端
+    function submitDataToBackend(studentClass, studentClassNo, studentName, totalScore) {
+      // 請替換成你為此個小測（DiscriminantAndRoots）新建並部署的 Google Apps Script Web App URL
+      const webAppUrl = "https://script.google.com/macros/s/AKfycbw7iYWKLvaxGzVArQDTIm4Cv2IwA18aDObYEyOyIBWSlaxemmWCFGp7EpQkrjOiCH1i/exec"; 
+      
+      const payload = new URLSearchParams();
+      payload.append("studentClass", studentClass);
+      payload.append("studentClassNo", studentClassNo);
+      payload.append("studentName", studentName);
+      payload.append("score", totalScore);
+
+      fetch(webAppUrl, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: payload.toString()
+      })
+      .then(() => console.log("Data background sync initialized."))
+      .catch(err => console.error("Sync error:", err));
+    }
+
     function submitQuiz() {
+      // 驗證學生資料填寫
+      const sClass = document.getElementById('studentClass').value;
+      const sClassNo = document.getElementById('studentClassNo').value;
+      const sName = document.getElementById('studentName').value.trim();
+
+      if (!sClass || !sClassNo || !sName) {
+        alert("Please fill in your Student Information (Class, Class No., Name) before submitting!");
+        return;
+      }
+
       let score = 0;
       const totalScore = 17;
 
@@ -452,7 +510,7 @@
       const q4dValid = ['x=m', 'x=n', 'x=morx=n', 'x=norx=m', 'm', 'n', 'm,n'].includes(q4dVal);
       if (q4dValid) score++; setBadge('q4_d-status', q4dValid, 'x = m or x = n');
 
-      // Q4 (e) - Flexible matching for Step 1 sum (e.g. (m+3)+(n+3), m+n+6, etc.)
+      // Q4 (e) - Flexible matching for Step 1 sum
       const s1Name = norm(document.getElementById('q4_e_s1_name').value) === 'sum';
       const s1ValInput = norm(document.getElementById('q4_e_s1_val').value);
       const s1ValValid = ['(m+3)+(n+3)', 'm+3+n+3', 'm+n+6', '6+m+n'].includes(s1ValInput);
@@ -472,6 +530,9 @@
       if (s2Name) score++; setBadge('q4_e_s2_name-status', s2Name, 'Product');
       if (s2ValValid) score++; setBadge('q4_e_s2_val-status', s2ValValid, '(m+3)(n+3)');
       if (s3Val) score++; setBadge('q4_e_s3-status', s3Val, 'x^2 - S x + P = 0');
+
+      // 異步傳送資料至 Google Sheet 後端
+      submitDataToBackend(sClass, sClassNo, sName, score);
 
       // Lock Inputs
       const inputs = document.querySelectorAll('input, select, button');
