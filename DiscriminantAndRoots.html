@@ -410,10 +410,98 @@
       }
     }
 
-    // Helper: Normalize string by stripping whitespace and converting to lowercase
-    function norm(str) {
+    // 1. 清理與正規化輸入（處理手機全角符號與隱式乘法）
+    function normalizeMathInput(str) {
       if (!str) return '';
-      return str.toString().toLowerCase().replace(/\s+/g, '');
+      let s = str.toString().trim().toLowerCase();
+      
+      // 替換手機常見全角符號為標準半角符號
+      s = s.replace(/＾/g, '^')
+           .replace(/[－—–−]/g, '-')
+           .replace(/＊/g, '*')
+           .replace(/／/g, '/')
+           .replace(/（/g, '(')
+           .replace(/）/g, ')')
+           .replace(/＋/g, '+')
+           .replace(/\s+/g, ''); // 去除所有空白
+
+      return s;
+    }
+
+    // 2. 數值/分數比對（例如 5/2 與 2.5 相等）
+    function checkNumericEquivalence(inputStr, targetValue) {
+      const clean = normalizeMathInput(inputStr);
+      if (!clean) return false;
+      try {
+        // 處理分數 a/b
+        if (clean.includes('/')) {
+          const parts = clean.split('/');
+          if (parts.length === 2) {
+            const num = parseFloat(parts[0]);
+            const den = parseFloat(parts[1]);
+            if (!isNaN(num) && !isNaN(den) && den !== 0) {
+              return Math.abs((num / den) - targetValue) < 1e-6;
+            }
+          }
+        }
+        const val = parseFloat(clean);
+        return !isNaN(val) && Math.abs(val - targetValue) < 1e-6;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    // 3. 代數式等價性檢查（採用數值採樣驗證代數相等性）
+    function checkAlgebraicEquivalence(inputStr, targetExpr, vars = ['m', 'n', 'k', 'x']) {
+      const cleanInput = normalizeMathInput(inputStr);
+      const cleanTarget = normalizeMathInput(targetExpr);
+      if (!cleanInput) return false;
+
+      // 將 JS 不支援的次方 ^ 轉為 **
+      let exprInput = cleanInput.replace(/\^/g, '**');
+      let exprTarget = cleanTarget.replace(/\^/g, '**');
+
+      // 補全隱式乘法 (例如 2m -> 2*m, nm -> n*m, 2( -> 2*(, )m -> )*m)
+      const addExplicitMultiplication = (expr) => {
+        return expr
+          .replace(/(\d)([a-z\(])/g, '$1*$2')
+          .replace(/([a-z\)])(\d)/g, '$1*$2')
+          .replace(/([a-z\)])([a-z])/g, '$1*$2')
+          .replace(/(\))(\()/g, '$1*$2')
+          .replace(/([a-z\)])(\()/g, '$1*$2')
+          .replace(/(\))([a-z])/g, '$1*$2');
+      };
+
+      // 執行兩次補全以涵蓋 2nm -> 2*n*m 等多重隱式乘法
+      exprInput = addExplicitMultiplication(addExplicitMultiplication(exprInput));
+      exprTarget = addExplicitMultiplication(addExplicitMultiplication(exprTarget));
+
+      // 進行 5 組隨機測試點採樣
+      const testCases = [
+        { m: 2.3, n: 4.1, k: 3.5, x: 1.7 },
+        { m: -1.5, n: 2.8, k: -2.2, x: 3.1 },
+        { m: 5.2, n: -3.4, k: 1.9, x: -0.8 },
+        { m: 0.7, n: 1.2, k: -4.3, x: 2.5 },
+        { m: -3.1, n: -2.6, k: 5.1, x: -1.4 }
+      ];
+
+      try {
+        for (const sample of testCases) {
+          const fnInput = new Function(...vars, `return ${exprInput};`);
+          const fnTarget = new Function(...vars, `return ${exprTarget};`);
+
+          const args = vars.map(v => sample[v]);
+          const valInput = fnInput(...args);
+          const valTarget = fnTarget(...args);
+
+          if (isNaN(valInput) || Math.abs(valInput - valTarget) > 1e-5) {
+            return false;
+          }
+        }
+        return true;
+      } catch (e) {
+        return false;
+      }
     }
 
     function setBadge(elementId, isCorrect, correctAnsText) {
@@ -429,9 +517,7 @@
       }
     }
 
-    // 傳送學生資料及分數至 Google Sheets 後端
     function submitDataToBackend(studentClass, studentClassNo, studentName, totalScore) {
-      // 請替換成你為此個小測（DiscriminantAndRoots）新建並部署的 Google Apps Script Web App URL
       const webAppUrl = "https://script.google.com/macros/s/AKfycbw7iYWKLvaxGzVArQDTIm4Cv2IwA18aDObYEyOyIBWSlaxemmWCFGp7EpQkrjOiCH1i/exec"; 
       
       const payload = new URLSearchParams();
@@ -453,7 +539,6 @@
     }
 
     function submitQuiz() {
-      // 驗證學生資料填寫
       const sClass = document.getElementById('studentClass').value;
       const sClassNo = document.getElementById('studentClassNo').value;
       const sName = document.getElementById('studentName').value.trim();
@@ -466,11 +551,11 @@
       let score = 0;
       const totalScore = 17;
 
-      // Q1
-      const q1Val = norm(document.getElementById('q1').value);
-      const q1Valid = ['k^2-4(3)(2)', 'k^2-4*3*2', 'k^2-24', 'k**2-24', 'k^2-4(2)(3)'].includes(q1Val);
+      // Q1: k^2 - 24
+      const q1Input = document.getElementById('q1').value;
+      const q1Valid = checkAlgebraicEquivalence(q1Input, 'k^2 - 24', ['k']);
       if (q1Valid) score++;
-      setBadge('q1-status', q1Valid, 'k^2-24');
+      setBadge('q1-status', q1Valid, 'k^2 - 24');
       const q1Fb = document.getElementById('q1-fb');
       q1Fb.classList.remove('hidden');
       q1Fb.className = q1Valid ? 'text-sm rounded-lg p-3 bg-emerald-50 border border-emerald-200 text-emerald-900 font-medium' : 'text-sm rounded-lg p-3 bg-rose-50 border border-rose-200 text-rose-900';
@@ -497,33 +582,35 @@
       if (q3c) score++; setBadge('q3_c-status', q3c, '>');
 
       // Q4 (a)-(c)
-      const q4aValid = ['5/2', '2.5', '+5/2'].includes(norm(document.getElementById('q4_a').value));
-      const q4bValid = ['8/2', '4'].includes(norm(document.getElementById('q4_b').value));
-      const q4cValid = ['(m+n)^2-2mn', '(m+n)^2-2*m*n', 'm^2+n^2'].includes(norm(document.getElementById('q4_c').value));
+      const q4aValid = checkNumericEquivalence(document.getElementById('q4_a').value, 2.5);
+      const q4bValid = checkNumericEquivalence(document.getElementById('q4_b').value, 4);
+      
+      // Q4c: 支援 (m+n)^2 - 2mn, (m+n)^2 - 2nm, m^2 + n^2 等所有等價式
+      const q4cInput = document.getElementById('q4_c').value;
+      const q4cValid = checkAlgebraicEquivalence(q4cInput, '(m+n)^2 - 2*m*n', ['m', 'n']);
 
       if (q4aValid) score++; setBadge('q4_a-status', q4aValid, '5/2 or 2.5');
       if (q4bValid) score++; setBadge('q4_b-status', q4bValid, '4');
-      if (q4cValid) score++; setBadge('q4_c-status', q4cValid, '(m+n)^2-2mn');
+      if (q4cValid) score++; setBadge('q4_c-status', q4cValid, '(m+n)^2 - 2mn');
 
       // Q4 (d)
-      const q4dVal = norm(document.getElementById('q4_d').value);
-      const q4dValid = ['x=m', 'x=n', 'x=morx=n', 'x=norx=m', 'm', 'n', 'm,n'].includes(q4dVal);
+      const q4dNorm = normalizeMathInput(document.getElementById('q4_d').value);
+      const q4dValid = ['x=m', 'x=n', 'x=morx=n', 'x=norx=m', 'm', 'n', 'm,n', 'n,m'].includes(q4dNorm);
       if (q4dValid) score++; setBadge('q4_d-status', q4dValid, 'x = m or x = n');
 
-      // Q4 (e) - Flexible matching for Step 1 sum
-      const s1Name = norm(document.getElementById('q4_e_s1_name').value) === 'sum';
-      const s1ValInput = norm(document.getElementById('q4_e_s1_val').value);
-      const s1ValValid = ['(m+3)+(n+3)', 'm+3+n+3', 'm+n+6', '6+m+n'].includes(s1ValInput);
+      // Q4 (e)
+      const s1Name = normalizeMathInput(document.getElementById('q4_e_s1_name').value) === 'sum';
+      const s1ValInput = document.getElementById('q4_e_s1_val').value;
+      const s1ValValid = checkAlgebraicEquivalence(s1ValInput, 'm + n + 6', ['m', 'n']);
 
-      const s2Name = norm(document.getElementById('q4_e_s2_name').value) === 'product';
-      const s2ValInput = norm(document.getElementById('q4_e_s2_val').value);
-      const s2ValValid = ['(m+3)(n+3)', '(m+3)*(n+3)', 'mn+3m+3n+9', 'mn+3(m+n)+9'].includes(s2ValInput);
+      const s2Name = normalizeMathInput(document.getElementById('q4_e_s2_name').value) === 'product';
+      const s2ValInput = document.getElementById('q4_e_s2_val').value;
+      const s2ValValid = checkAlgebraicEquivalence(s2ValInput, '(m+3)*(n+3)', ['m', 'n']);
 
-      const s3Val = [
-        'x^2-sx+p=0', 
-        'x^2-s*x+p=0',
-        'x^2-(m+n+6)x+(mn+3(m+n)+9)=0'
-      ].includes(norm(document.getElementById('q4_e_s3').value));
+      // Step 3 判斷方程等價性或文字
+      const s3Raw = normalizeMathInput(document.getElementById('q4_e_s3').value);
+      const s3Val = ['x^2-sx+p=0', 'x^2-(m+n+6)x+(mn+3(m+n)+9)=0'].includes(s3Raw) || 
+                    checkAlgebraicEquivalence(s3Raw.replace('=0',''), 'x^2 - 8.5*x + 20.5', ['x']);
 
       if (s1Name) score++; setBadge('q4_e_s1_name-status', s1Name, 'Sum');
       if (s1ValValid) score++; setBadge('q4_e_s1_val-status', s1ValValid, '(m+3)+(n+3)');
@@ -531,7 +618,7 @@
       if (s2ValValid) score++; setBadge('q4_e_s2_val-status', s2ValValid, '(m+3)(n+3)');
       if (s3Val) score++; setBadge('q4_e_s3-status', s3Val, 'x^2 - S x + P = 0');
 
-      // 異步傳送資料至 Google Sheet 後端
+      // 傳送資料至 Google Sheet
       submitDataToBackend(sClass, sClassNo, sName, score);
 
       // Lock Inputs
